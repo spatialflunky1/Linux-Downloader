@@ -1,5 +1,4 @@
 #include <ncurses.h>
-#include <iostream>
 
 int key=0;
 bool running=true;
