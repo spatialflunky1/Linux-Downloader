@@ -6,7 +6,8 @@ PATH_INST = $(PREFIX)/bin
 
 all:
 	$(MAKE) -C src all
-	mv ./src/lidown ./
+	mkdir bin
+	mv ./src/lidown ./bin/
 
 intstall:
 	echo "not a stable build so not installing yet"
@@ -15,4 +16,4 @@ uninstall:
 	echo "dude its not even installed"
 
 clean:
-	rm -rf lidown
+	rm -rf bin
