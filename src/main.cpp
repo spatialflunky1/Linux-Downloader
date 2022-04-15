@@ -76,12 +76,12 @@ std::vector<std::string> get_versions(std::string title) {
 }
 
 int main() {
-    std::vector<std::string> menu1 = {"Select a distro:",
+    std::vector<std::string> menu = {"Select a distro:",
                                       "Ubuntu",
                                       "Gentoo",
                                       "Linux Kernel"}; // format: {title,item1,item2,etc}
-    int length1 = menu1.size();
-    std::vector<std::string> menu2;
+    int length1 = menu.size();
+    std::vector<std::string> versions;
     int length2;
     initscr(); // start curses mode
     start_color();
@@ -94,19 +94,19 @@ int main() {
     while (running) {
         switch (current) {
             case 0:
-                dialog(menu1,length1); 
+                dialog(menu,length1); 
                 break;
             case 1:
                 if (need_update) {
                     clear();
                     mvprintw(0,0,(char*)"Loading Versions...");
                     refresh();
-                    menu2 = get_versions(menu1[selected_distro+1]);
-                    length2 = menu2.size();
+                    versions = get_versions(menu[selected_distro+1]);
+                    length2 = versions.size();
                     need_update = false;
                     clear();
                 }
-                dialog(menu2,length2);
+                dialog(versions,length2);
                 break;
         }        
         update_selection();
