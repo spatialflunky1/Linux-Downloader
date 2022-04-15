@@ -9,7 +9,7 @@ bool running=true;
 bool need_update=true;
 int current=0;
 int current_selection=0;
-int selected_distro=0;
+int selected=0;
 
 void update_selection() {
     key = getch();
@@ -24,8 +24,8 @@ void update_selection() {
             key=0;
             break;
         case 10:
-            if (current < 1) current++;
-            selected_distro=current_selection;
+            if (current < 2) current++;
+            selected=current_selection;
             current_selection=0;
             clear();
             break;
@@ -35,13 +35,24 @@ void update_selection() {
     }
 }
 
-void dialog(std::vector<std::string> menu, int length) {
+void dialog(std::vector<std::string> menu, int length, std::string title) {
     attron(COLOR_PAIR(3));
     mvprintw(0,0,menu[0].c_str());
-    for (int i=1; i<length; i++) {
-        if (current_selection+1==i) attron(COLOR_PAIR(2));
-        else attron(COLOR_PAIR(1));
-        mvprintw(i+1,0,menu[i].c_str());
+    if (title.compare((std::string)"Ubuntu") == 0) {
+        printw((char*)"\n");
+        for (int i=1; i<length-1; i+=2) {
+            if (current_selection==(i-1)/2) attron(COLOR_PAIR(2));
+            else attron(COLOR_PAIR(1));
+            printw(((std::string)"\n"+menu[i]+(std::string)" ").c_str());
+            printw(menu[i+1].c_str());
+        }
+    }
+    else {
+        for (int i=1; i<length; i++) {
+            if (current_selection+1==i) attron(COLOR_PAIR(2));
+            else attron(COLOR_PAIR(1));
+            mvprintw(i+1,0,menu[i].c_str());
+        }
     }
     refresh();
 }
@@ -58,13 +69,13 @@ std::vector<std::string> get_versions(std::string title) {
     std::vector<std::string> versions;
     if (res) {
         std::string body_text = res->body;
-        nlohmann::json body = nlohmann::json::parse(body_text);       
+        nlohmann::json body = nlohmann::json::parse(body_text);
         if (title.compare((std::string)"Ubuntu")==0) {
             versions.push_back((std::string)"Select Version:");
             for (int i=0; i<(int)body["total_size"]; i++) {        
                 nlohmann::json entry = body["entries"][i];
-                std::string version = (std::string)entry["fullseriesname"]+(std::string)" "+(std::string)entry["version"]+(std::string)"\n";  
-                versions.push_back(version);
+                versions.push_back((std::string)entry["fullseriesname"]);
+                versions.push_back((std::string)entry["version"]);
             }
         }
     }
@@ -81,8 +92,9 @@ int main() {
                                       "Gentoo",
                                       "Linux Kernel"}; // format: {title,item1,item2,etc}
     int length1 = menu.size();
-    std::vector<std::string> versions;
+    std::vector<std::string> versions; // ubuntu format: {name,number,name,number,etc}
     int length2;
+    std::string distro;
     initscr(); // start curses mode
     start_color();
     init_pair(1,COLOR_WHITE,COLOR_BLACK); // 1: No highlight
@@ -94,19 +106,28 @@ int main() {
     while (running) {
         switch (current) {
             case 0:
-                dialog(menu,length1); 
+                dialog(menu,length1,distro); 
                 break;
             case 1:
                 if (need_update) {
                     clear();
                     mvprintw(0,0,(char*)"Loading Versions...");
                     refresh();
-                    versions = get_versions(menu[selected_distro+1]);
+                    distro=menu[selected+1];
+                    versions = get_versions(distro);
                     length2 = versions.size();
                     need_update = false;
                     clear();
+                    refresh();
                 }
-                dialog(versions,length2);
+                dialog(versions,length2,distro);
+                break;
+            case 2:
+                if (menu[selected+1].compare((std::string)"Ubuntu") == 0) {
+                    for (int i=1; i<versions.size(); i++) {
+                        mvprintw(i-1,0,versions[i].c_str());
+                    }
+                }
                 break;
         }        
         update_selection();
