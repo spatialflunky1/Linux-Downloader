@@ -1,2 +1,2 @@
 all:
-	g++ -lncurses -ltinfo main.cpp -o lidown
+	g++ -lncurses -ltinfo -lssl -lcrypto main.cpp -o lidown
