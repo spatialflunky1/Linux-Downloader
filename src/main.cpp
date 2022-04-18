@@ -38,50 +38,40 @@ void update_selection() {
 void dialog(std::vector<std::string> menu, int length, std::string title) {
     attron(COLOR_PAIR(3));
     mvprintw(0,0,menu[0].c_str());
-    if (title.compare((std::string)"Ubuntu") == 0) {
-        printw((char*)"\n");
-        for (int i=1; i<length-1; i+=2) {
-            if (current_selection==(i-1)/2) attron(COLOR_PAIR(2));
-            else attron(COLOR_PAIR(1));
-            printw(((std::string)"\n"+menu[i]+(std::string)" ").c_str());
-            printw(menu[i+1].c_str());
-        }
-    }
-    else {
-        for (int i=1; i<length; i++) {
-            if (current_selection+1==i) attron(COLOR_PAIR(2));
-            else attron(COLOR_PAIR(1));
-            mvprintw(i+1,0,menu[i].c_str());
-        }
+    for (int i=1; i<length; i++) {
+        if (current_selection+1==i) attron(COLOR_PAIR(2));
+        else attron(COLOR_PAIR(1));
+        mvprintw(i+1,0,menu[i].c_str());
     }
     refresh();
 }
 
 std::vector<std::string> get_versions(std::string title) {
-    std::string url;
-    std::string subdomain;
-    if (title.compare((std::string)"Ubuntu")==0) {
-        url = "https://api.launchpad.net";
-        subdomain = "/devel/ubuntu/series";
-    }
-    httplib::Client cli(url);
-    auto res = cli.Get(subdomain.c_str());
     std::vector<std::string> versions;
+    std::string url = "72.231.177.233";
+    int port = 80;
+    httplib::Client cli(url,port);
+    auto res;
+    // Request ubuntu versions from the server
+    if (title.compare((std::string)"Ubuntu")==0) res = cli.Post("/", "Ubuntu getvers", "text/plain");
+    // If data gets returned
     if (res) {
         std::string body_text = res->body;
-        nlohmann::json body = nlohmann::json::parse(body_text);
         if (title.compare((std::string)"Ubuntu")==0) {
             versions.push_back((std::string)"Select Version:");
-            for (int i=0; i<(int)body["total_size"]; i++) {        
-                nlohmann::json entry = body["entries"][i];
-                versions.push_back((std::string)entry["fullseriesname"]);
-                versions.push_back((std::string)entry["version"]);
+            std::stringstream s_stream(body_text);
+            while (s_stream.good()) {
+                std::string substr;
+                getline(s_stream,substr,',');
+                versions.push_back(substr);
             }
         }
     }
+    // If no data is returned print the error
     else {
         std::string message = (std::string)"Error: "+httplib::to_string(res.error())+(std::string)"\n";
         mvprintw(0,0,message.c_str());
+        refresh();
     }
     return versions;
 }
@@ -92,7 +82,7 @@ int main() {
                                       "Gentoo",
                                       "Linux Kernel"}; // format: {title,item1,item2,etc}
     int length1 = menu.size();
-    std::vector<std::string> versions; // ubuntu format: {name,number,name,number,etc}
+    std::vector<std::string> versions;
     int length2;
     std::string distro;
     initscr(); // start curses mode
