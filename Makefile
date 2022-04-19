@@ -5,8 +5,8 @@ MAKE = make
 PATH_INST = $(PREFIX)/bin
 
 all:
-	mkdir bin
 	$(MAKE) -C src all
+        mkdir -p ./bin
 	mv ./src/lidown ./bin/
 
 intstall:
