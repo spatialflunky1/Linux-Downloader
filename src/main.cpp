@@ -46,14 +46,13 @@ void dialog(std::vector<std::string> menu, int length, std::string title) {
     refresh();
 }
 
-std::vector<std::string> get_versions(std::string title) {
+std::vector<std::string> get_versions(std::string title, std::string request) {
     std::vector<std::string> versions;
     std::string url = "72.231.177.233";
     int port = 80;
     httplib::Client cli(url,port);
-    auto res;
     // Request ubuntu versions from the server
-    if (title.compare((std::string)"Ubuntu")==0) res = cli.Post("/", "Ubuntu getvers", "text/plain");
+    auto res = cli.Post("/", request, "text/plain");
     // If data gets returned
     if (res) {
         std::string body_text = res->body;
@@ -70,8 +69,9 @@ std::vector<std::string> get_versions(std::string title) {
     // If no data is returned print the error
     else {
         std::string message = (std::string)"Error: "+httplib::to_string(res.error())+(std::string)"\n";
-        mvprintw(0,0,message.c_str());
-        refresh();
+        endwin();
+        std::cout << message << std::endl;
+        exit(0);
     }
     return versions;
 }
@@ -79,7 +79,6 @@ std::vector<std::string> get_versions(std::string title) {
 int main() {
     std::vector<std::string> menu = {"Select a distro:",
                                       "Ubuntu",
-                                      "Gentoo",
                                       "Linux Kernel"}; // format: {title,item1,item2,etc}
     int length1 = menu.size();
     std::vector<std::string> versions;
@@ -104,7 +103,7 @@ int main() {
                     mvprintw(0,0,(char*)"Loading Versions...");
                     refresh();
                     distro=menu[selected+1];
-                    versions = get_versions(distro);
+                    versions = get_versions(distro, "Ubuntu getvers");
                     length2 = versions.size();
                     need_update = false;
                     clear();
