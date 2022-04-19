@@ -103,7 +103,7 @@ int main() {
                     mvprintw(0,0,(char*)"Loading Versions...");
                     refresh();
                     distro=menu[selected+1];
-                    versions = get_versions(distro, "Ubuntu getvers");
+                    versions = get_versions(distro, distro+" getvers");
                     length2 = versions.size();
                     need_update = false;
                     clear();
