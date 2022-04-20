@@ -80,6 +80,7 @@ int main() {
     std::vector<std::string> menu = {"Select a distro:",
                                       "Ubuntu",
                                       "Linux Kernel"}; // format: {title,item1,item2,etc}
+    std::vector<std::string> states = {"distro","version","files"};
     int length1 = menu.size();
     std::vector<std::string> versions;
     int length2;
@@ -93,31 +94,27 @@ int main() {
     curs_set(0);
     clear();
     while (running) {
-        switch (current) {
-            case 0:
-                dialog(menu,length1,distro); 
-                break;
-            case 1:
-                if (need_update) {
-                    clear();
-                    mvprintw(0,0,(char*)"Loading Versions...");
-                    refresh();
-                    distro=menu[selected+1];
-                    versions = get_versions(distro, distro+" getvers");
-                    length2 = versions.size();
-                    need_update = false;
-                    clear();
-                    refresh();
-                }
-                dialog(versions,length2,distro);
-                break;
-            case 2:
-                if (menu[selected+1].compare((std::string)"Ubuntu") == 0) {
-                    for (int i=1; i<versions.size(); i++) {
-                        mvprintw(i-1,0,versions[i].c_str());
-                    }
-                }
-                break;
+        if (states.at(current).compare("distro")==0) {
+            dialog(menu,length1,distro); 
+        }
+        if (states.at(current).compare("version")==0) {
+            if (need_update) {
+                clear();
+                mvprintw(0,0,(char*)"Loading Versions...");
+                refresh();
+                distro=menu[selected+1];
+                versions = get_versions(distro, distro+" getvers");
+                length2 = versions.size();
+                need_update = false;
+                clear();
+                refresh();
+            }
+            dialog(versions,length2,distro);
+        }
+        if (states.at(current).compare("files")==0) {
+            if (menu[selected+1].compare((std::string)"Ubuntu") == 0) {         
+            
+            }
         }        
         update_selection();
         refresh();
