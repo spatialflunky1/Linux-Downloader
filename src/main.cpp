@@ -6,7 +6,6 @@
 
 int key=0;
 bool running=true;
-bool need_update=true;
 int current=0;
 int current_selection=0;
 int selected=0;
@@ -77,14 +76,17 @@ std::vector<std::string> get_versions(std::string title, std::string request) {
 }
 
 int main() {
-    std::vector<std::string> menu = {"Select a distro:",
+    std::vector<std::string> distros = {"Select a distro:",
                                       "Ubuntu",
                                       "Linux Kernel"}; // format: {title,item1,item2,etc}
     std::vector<std::string> states = {"distro","version","files"};
-    int length1 = menu.size();
+    int length1 = distros.size();
     std::vector<std::string> versions;
-    int length2;
+    std::vector<std::string> files;
+    bool need_versions=true;
+    bool need_files=true;
     std::string distro;
+    std::string version;
     initscr(); // start curses mode
     start_color();
     init_pair(1,COLOR_WHITE,COLOR_BLACK); // 1: No highlight
@@ -95,26 +97,33 @@ int main() {
     clear();
     while (running) {
         if (states.at(current).compare("distro")==0) {
-            dialog(menu,length1,distro); 
+            dialog(distros,length1,distro); 
         }
         if (states.at(current).compare("version")==0) {
-            if (need_update) {
+            if (need_versions) {
                 clear();
                 mvprintw(0,0,(char*)"Loading Versions...");
                 refresh();
-                distro=menu[selected+1];
+                distro=distros.at(selected+1);
                 versions = get_versions(distro, distro+" getvers");
-                length2 = versions.size();
-                need_update = false;
+                need_versions = false;
                 clear();
                 refresh();
             }
-            dialog(versions,length2,distro);
+            dialog(versions,versions.size(),distro);
         }
         if (states.at(current).compare("files")==0) {
-            if (menu[selected+1].compare("Ubuntu") == 0) {         
-            
+            if (need_files) {
+                clear();
+                mvprintw(0,0,(char*)"Loading Files...");
+                refresh();
+                version=versions.at(selected+1);
+                files=get_versions(distro,distro+" getfiles "+version);
+                need_files=false;
+                clear();
+                refresh();
             }
+            dialog(files,files.size(),distro);
         }        
         update_selection();
         refresh();
