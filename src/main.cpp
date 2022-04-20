@@ -112,7 +112,7 @@ int main() {
             dialog(versions,length2,distro);
         }
         if (states.at(current).compare("files")==0) {
-            if (menu[selected+1].compare((std::string)"Ubuntu") == 0) {         
+            if (menu[selected+1].compare("Ubuntu") == 0) {         
             
             }
         }        
