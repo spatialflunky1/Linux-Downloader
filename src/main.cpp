@@ -24,7 +24,7 @@ void update_selection() {
     refresh();
     switch (key) {
         case 66:         
-            if (current_selection<=bottom) current_selection++;
+            if (current_selection<bottom-1) current_selection++;
             key=0;
             break;
         case 65:
