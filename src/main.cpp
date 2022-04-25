@@ -16,7 +16,7 @@ int bottom; // Bottom location (length of menu list)
 const std::string url = "72.231.177.233"; // IP of my server
 const int port = 80; // Port of my server
 const std::vector<std::string> distros = {"Select a distro:","Ubuntu","Linux Kernel"}; // Menu 1
-const length1=distros.size();
+const int length1=distros.size();
 const std::vector<std::string> states = {"distro","version","files"}; // Possible states of program
 
 void update_selection() {
