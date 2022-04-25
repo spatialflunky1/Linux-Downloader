@@ -96,7 +96,8 @@ int main() {
         exit(EXIT_FAILURE);
     } // start curses mode or exit on error
     start_color();
-    init_pair(1,COLOR_WHITE,COLOR_BLACK); // 1: No highlight
+    use_default_colors();
+    init_pair(1,COLOR_WHITE,-1); // 1: No highlight
     init_pair(2,COLOR_BLACK,COLOR_WHITE); // 2: highlight
     init_pair(3,COLOR_RED,COLOR_CYAN); // 3: title highlight
     noecho();
