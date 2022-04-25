@@ -4,18 +4,27 @@
 #include <ncurses.h>
 #include <iostream>
 
-int key=0;
+// Global Vars
+int key; // Key id
 bool running=true;
-int current=0;
-int current_selection=0;
-int selected=0;
+int current=0; // Current menu
+int current_selection=0; // Selected item
+int selected; // Selection from last menu
+int bottom; // Bottom location (length of menu list)
+
+// Constants
+const std::string url = "72.231.177.233"; // IP of my server
+const int port = 80; // Port of my server
+const std::vector<std::string> distros = {"Select a distro:","Ubuntu","Linux Kernel"}; // Menu 1
+const length1=distros.size();
+const std::vector<std::string> states = {"distro","version","files"}; // Possible states of program
 
 void update_selection() {
     key = getch();
     refresh();
     switch (key) {
         case 66:         
-            current_selection++;
+            if (current_selection<=bottom) current_selection++;
             key=0;
             break;
         case 65:
@@ -47,8 +56,6 @@ void dialog(std::vector<std::string> menu, int length, std::string title) {
 
 std::vector<std::string> get_versions(std::string title, std::string request) {
     std::vector<std::string> versions;
-    std::string url = "72.231.177.233";
-    int port = 80;
     httplib::Client cli(url,port);
     // Request ubuntu versions from the server
     auto res = cli.Post("/", request, "text/plain");
@@ -76,18 +83,18 @@ std::vector<std::string> get_versions(std::string title, std::string request) {
 }
 
 int main() {
-    std::vector<std::string> distros = {"Select a distro:",
-                                      "Ubuntu",
-                                      "Linux Kernel"}; // format: {title,item1,item2,etc}
-    std::vector<std::string> states = {"distro","version","files"};
-    int length1 = distros.size();
+    bottom=length1-1;
     std::vector<std::string> versions;
     std::vector<std::string> files;
     bool need_versions=true;
     bool need_files=true;
     std::string distro;
     std::string version;
-    initscr(); // start curses mode
+    WINDOW * mainWindow;
+    if ((mainWindow = initscr()) == NULL) {
+        std::cout << "Failed to start ncurses" << std::endl;
+        exit(EXIT_FAILURE);
+    } // start curses mode or exit on error
     start_color();
     init_pair(1,COLOR_WHITE,COLOR_BLACK); // 1: No highlight
     init_pair(2,COLOR_BLACK,COLOR_WHITE); // 2: highlight
@@ -106,6 +113,7 @@ int main() {
                 refresh();
                 distro=distros.at(selected+1);
                 versions = get_versions(distro, distro+" getvers");
+                bottom=versions.size()-1;
                 need_versions = false;
                 clear();
                 refresh();
@@ -119,6 +127,7 @@ int main() {
                 refresh();
                 version=versions.at(selected+1);
                 files=get_versions(distro,distro+" getfiles "+version);
+                bottom=files.size()-1;
                 need_files=false;
                 clear();
                 refresh();
@@ -128,7 +137,9 @@ int main() {
         update_selection();
         refresh();
     }
+    delwin(mainWindow);
     endwin(); // exit curses mode
     printf("\x1b[2J"); // clear screen
     printf("\x1b[d"); // return to home position
+    return 0;
 }
