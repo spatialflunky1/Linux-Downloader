@@ -5,4 +5,4 @@ Linux downloader is a command line interface for downloading any Linux distro
 Title sometimes duplicates when running over SSH
 
 ## Planned features:
-[ ] wrap text when offscreen at bottom
+* Wrap text when offscreen at bottom
