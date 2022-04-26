@@ -54,7 +54,7 @@ void dialog(std::vector<std::string> menu, int length, std::string title) {
     refresh();
 }
 
-std::vector<std::string> get_versions(std::string title, std::string request) {
+std::vector<std::string> get_data(std::string distro, std::string request,std::string title) {
     std::vector<std::string> versions;
     httplib::Client cli(url,port);
     // Request ubuntu versions from the server
@@ -62,8 +62,8 @@ std::vector<std::string> get_versions(std::string title, std::string request) {
     // If data gets returned
     if (res) {
         std::string body_text = res->body;
-        if (title.compare((std::string)"Ubuntu")==0) {
-            versions.push_back((std::string)"Select Version:");
+        if (distro.compare((std::string)"Ubuntu")==0) {
+            versions.push_back(title);
             std::stringstream s_stream(body_text);
             while (s_stream.good()) {
                 std::string substr;
@@ -113,7 +113,7 @@ int main() {
                 mvprintw(0,0,(char*)"Loading Versions...");
                 refresh();
                 distro=distros.at(selected+1);
-                versions = get_versions(distro, distro+" getvers");
+                versions = get_data(distro, distro+" getvers","Select version");
                 bottom=versions.size()-1;
                 need_versions = false;
                 clear();
@@ -127,7 +127,7 @@ int main() {
                 mvprintw(0,0,(char*)"Loading Files...");
                 refresh();
                 version=versions.at(selected+1);
-                files=get_versions(distro,distro+" getfiles "+version);
+                files=get_data(distro,distro+" getfiles "+version,"Select file:");
                 bottom=files.size()-1;
                 need_files=false;
                 clear();
