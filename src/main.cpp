@@ -81,11 +81,11 @@ std::vector<std::string> get_data(std::string distro, std::string request,std::s
     return versions;
 }
 
-void download_file(std::string downUrl) {
+void download_file(std::string downUrl, std::string filename) {
     std::string path;
     std::cout << "Enter path to download to: ";
     std::getline(std::cin, path);
-    std::string command = "wget "+downUrl; 
+    std::string command = "wget "+downUrl+" -O "+path+"/"+filename; 
     std::system(command.c_str());
 }
 
@@ -154,6 +154,6 @@ int main() {
     endwin(); // exit curses mode
     printf("\x1b[2J"); // clear screen
     printf("\x1b[d"); // return to home position
-    if (links.size()!=0) download_file(links.at(current_selection));
+    if (links.size()!=0) download_file(links.at(current_selection), files.at(current_selection+1));
     return 0;
 }
