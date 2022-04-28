@@ -90,7 +90,7 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
 void download_file(std::string downUrl, std::string filename) {
     // vars
     CURL *easyhandle;
-    static const char *pagefilename = "page.out";
+    static const char *pagefilename = filename.c_str();
     FILE *pagefile;
     // Curl setup
     curl_global_init(CURL_GLOBAL_ALL);
