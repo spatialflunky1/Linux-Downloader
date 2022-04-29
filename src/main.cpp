@@ -18,7 +18,14 @@ const int port = 80; // Port of my server
 const std::vector<std::string> distros = {"Select a distro:","Ubuntu","Linux Kernel"}; // Menu 1
 const int length1=distros.size();
 
-void update_selection() {
+void cleanup(WINDOW * mainWindow) {
+    delwin(mainWindow);
+    endwin(); // exit curses mode
+    printf("\x1b[2J"); // clear screen
+    printf("\x1b[d"); // return to home position
+}
+
+void update_selection(WINDOW * mainWindow) {
     key = getch();
     refresh();
     switch (key) {
@@ -39,6 +46,8 @@ void update_selection() {
             break;
         case 113:
             running=false;
+            cleanup(mainWindow);
+            exit(0);
             break;
     }
 }
@@ -89,8 +98,8 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
 
 void download_file(std::string downUrl, std::string filename) {
     // vars
-    CURL *easyhandle;
-    static const char *pagefilename = filename.c_str();
+    CURL *easyhandle;    
+    const char *pagefilename = filename.c_str();
     FILE *pagefile;
     // Curl setup
     curl_global_init(CURL_GLOBAL_ALL);
@@ -113,6 +122,9 @@ void download_file(std::string downUrl, std::string filename) {
     // Cleanup
     curl_easy_cleanup(easyhandle);
     curl_global_cleanup();
+    if (std::rename(filename.c_str(), (path+"/"+filename).c_str())<0) {
+        std::cout << strerror(errno) << "\n";
+    }
 }
 
 int main() {
@@ -173,13 +185,10 @@ int main() {
             }
             dialog(files,files.size(),distro);
         }
-        update_selection();
+        update_selection(mainWindow);
         refresh();
     }
-    delwin(mainWindow);
-    endwin(); // exit curses mode
-    printf("\x1b[2J"); // clear screen
-    printf("\x1b[d"); // return to home position
-    if (links.size()!=0) download_file(links.at(current_selection), files.at(current_selection+1));
+    cleanup(mainWindow);
+    download_file(links.at(current_selection), files.at(current_selection+1));
     return 0;
 }
