@@ -10,3 +10,5 @@ Linux downloader is a command line interface for downloading any Linux distro
 ## Supported Distros:
 - [x] Ubuntu
 - [ ] Linux Kernel Source 
+- [ ] Arch
+- [ ] Gentoo
