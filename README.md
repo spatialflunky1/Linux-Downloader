@@ -12,3 +12,6 @@ Linux downloader is a command line interface for downloading any Linux distro
 - [ ] Linux Kernel Source 
 - [ ] Arch
 - [ ] Gentoo
+
+## Credit:
+[httplib.h](https://github.com/yhirose/cpp-httplib)
