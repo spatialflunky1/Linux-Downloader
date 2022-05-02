@@ -6,3 +6,7 @@ Linux downloader is a command line interface for downloading any Linux distro
 
 ## Planned features:
 * Wrap text when offscreen at bottom
+
+## Supported Distros:
+- [x] Ubuntu
+- [ ] Linux Kernel Source 
