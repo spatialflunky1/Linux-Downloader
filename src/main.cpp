@@ -5,18 +5,18 @@
 #include <curl/curl.h>
 
 // Global Vars
-int key; // Key id
 bool running=true;
+bool need_update=true;
+int key; // Key id
 int current=0; // Current menu
 int current_selection=0; // Selected item
 int selected; // Selection from last menu
 int bottom; // Bottom location (length of menu list)
+std::vector<std::string> menu;
 
 // Constants
 const std::string url = "72.231.177.233"; // IP of my server
 const int port = 80; // Port of my server
-const std::vector<std::string> distros = {"Select a distro:","Ubuntu","Linux Kernel"}; // Menu 1
-const int length1=distros.size();
 
 void cleanup(WINDOW * mainWindow) {
     delwin(mainWindow);
@@ -41,7 +41,10 @@ void update_selection(WINDOW * mainWindow) {
             if (current < 3) current++;
             selected=current_selection;
             if (current==3) running=false;
-            else current_selection=0;
+            else {
+                current_selection=0;
+                need_update=true;
+            }
             clear();
             break;
         case 113:
@@ -71,14 +74,12 @@ std::vector<std::string> get_data(std::string distro, std::string request,std::s
     // If data gets returned
     if (res) {
         std::string body_text = res->body;
-        if (distro.compare("Ubuntu")==0) {
-            versions.push_back(title);
-            std::stringstream s_stream(body_text);
-            while (s_stream.good()) {
-                std::string substr;
-                getline(s_stream,substr,',');
-                versions.push_back(substr);
-            }
+        versions.push_back(title);
+        std::stringstream s_stream(body_text);
+        while (s_stream.good()) {
+            std::string substr;
+            getline(s_stream,substr,',');
+            versions.push_back(substr);
         }
     }
     // If no data is returned print the error
@@ -128,12 +129,8 @@ void download_file(std::string downUrl, std::string filename) {
 }
 
 int main() {
-    bottom=length1-1;
-    std::vector<std::string> versions;
     std::vector<std::string> files;
     std::vector<std::string> links;
-    bool need_versions=true;
-    bool need_files=true;
     std::string distro;
     std::string version;
     WINDOW * mainWindow;
@@ -151,35 +148,40 @@ int main() {
     clear();
     while (running) {
         if (current==0) {
-            dialog(distros,length1,distro); 
+            if (need_update) {
+                menu=get_data("","menu","Select a Distro:");
+                bottom=menu.size()-1;
+                need_update=false;
+            }
+            dialog(menu,menu.size(),distro); 
         }
         if (current==1) {
-            if (need_versions) {
+            if (need_update) {
                 clear();
                 mvprintw(0,0,(char*)"Loading Versions...");
                 refresh();
-                distro=distros.at(selected+1);
-                versions = get_data(distro, distro+" getvers","Select Version:");
-                bottom=versions.size()-1;
-                need_versions = false;
+                distro=menu.at(selected+1);
+                menu = get_data(distro, distro+" getvers","Select Version:");
+                bottom=menu.size()-1;
+                need_update = false;
                 clear();
                 refresh();
             }
-            dialog(versions,versions.size(),distro);
+            dialog(menu,menu.size(),distro);
         }
         if (current==2) {
-            if (need_files) {
+            if (need_update) {
                 clear();
                 mvprintw(0,0,(char*)"Loading Files...");
                 refresh();
-                version=versions.at(selected+1);
+                version=menu.at(selected+1);
                 std::vector<std::string> filesWLinks = get_data(distro,distro+" getfiles "+version,"Select File:");
                 for (int i=0; i<filesWLinks.size(); i++) {
                     if (i%2==1 || i==0) files.push_back(filesWLinks.at(i));
                     else links.push_back(filesWLinks.at(i));
                 }
                 bottom=files.size()-1;
-                need_files=false;
+                need_update=false;
                 clear();
                 refresh();
             }
