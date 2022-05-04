@@ -38,12 +38,17 @@ void update_selection(WINDOW * mainWindow) {
             if (current_selection>0) current_selection--;
             break;
         case 10:
-            if (current < 3 || distro.compare("Linux Kernel")==0) {
+            if (current < 3 && !(distro.compare("Linux Kernel")==0)) {
+                current++;
+                need_update=true;
+            }
+            if (distro.compare("Linux Kernel")==0) {
+                current_url+=menu.at(current_selection+2);
                 current++;
                 need_update=true;
             }
             selected=current_selection;
-            if (current==3) running=false;
+            if (current==3 && !(distro.compare("Linux Kernel")==0)) running=false;
             else current_selection=0;
             clear();
             break;
