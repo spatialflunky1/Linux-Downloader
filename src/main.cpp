@@ -13,6 +13,8 @@ int current_selection=0; // Selected item
 int selected; // Selection from last menu
 int bottom; // Bottom location (length of menu list)
 std::vector<std::string> menu;
+std::string current_url = "/pub/";
+std::string distro = "";
 
 // Constants
 const std::string url = "72.231.177.233"; // IP of my server
@@ -31,20 +33,18 @@ void update_selection(WINDOW * mainWindow) {
     switch (key) {
         case 66:         
             if (current_selection<bottom-1) current_selection++;
-            key=0;
             break;
         case 65:
             if (current_selection>0) current_selection--;
-            key=0;
             break;
         case 10:
-            if (current < 3) current++;
-            selected=current_selection;
-            if (current==3) running=false;
-            else {
-                current_selection=0;
+            if (current < 3 || distro.compare("Linux Kernel")==0) {
+                current++;
                 need_update=true;
             }
+            selected=current_selection;
+            if (current==3) running=false;
+            else current_selection=0;
             clear();
             break;
         case 113:
@@ -55,31 +55,32 @@ void update_selection(WINDOW * mainWindow) {
     }
 }
 
-void dialog(std::vector<std::string> menu, int length, std::string title) {
+void dialog(std::vector<std::string> menu, int length, int title_length) {
     attron(COLOR_PAIR(3));
     mvprintw(0,0,menu.at(0).c_str());
-    for (int i=1; i<length; i++) {
-        if (current_selection+1==i) attron(COLOR_PAIR(2));
+    if (title_length==2) mvprintw(1,0,("Index of "+menu.at(1)).c_str());
+    for (int i=title_length; i<length; i++) {
+        if (current_selection+title_length==i) attron(COLOR_PAIR(2));
         else attron(COLOR_PAIR(1));
-        mvprintw(i+1,0,menu.at(i).c_str());
+        mvprintw(i+title_length,0,menu.at(i).c_str());
     }
     refresh();
 }
 
 std::vector<std::string> get_data(std::string distro, std::string request,std::string title) {
-    std::vector<std::string> versions;
+    std::vector<std::string> menu;
     httplib::Client cli(url,port);
-    // Request ubuntu versions from the server
     auto res = cli.Post("/", request, "text/plain");
     // If data gets returned
     if (res) {
         std::string body_text = res->body;
-        versions.push_back(title);
+        if (distro.compare("Linux Kernel")==0) menu.push_back("https://mirrors.edge.kernel.org/");
+        menu.push_back(title);
         std::stringstream s_stream(body_text);
         while (s_stream.good()) {
             std::string substr;
             getline(s_stream,substr,',');
-            versions.push_back(substr);
+            menu.push_back(substr);
         }
     }
     // If no data is returned print the error
@@ -89,7 +90,7 @@ std::vector<std::string> get_data(std::string distro, std::string request,std::s
         std::cout << message << std::endl;
         exit(0);
     }
-    return versions;
+    return menu;
 }
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
@@ -129,9 +130,7 @@ void download_file(std::string downUrl, std::string filename) {
 }
 
 int main() {
-    std::vector<std::string> files;
     std::vector<std::string> links;
-    std::string distro;
     std::string version;
     WINDOW * mainWindow;
     if ((mainWindow = initscr()) == NULL) {
@@ -153,44 +152,52 @@ int main() {
                 bottom=menu.size()-1;
                 need_update=false;
             }
-            dialog(menu,menu.size(),distro); 
+            dialog(menu,menu.size(),1); 
         }
-        if (current==1) {
+        if (current==1 && distro.compare("")==0) {
+            distro=menu.at(selected+1);
+            printw(distro.c_str());
+        }
+        if (distro.compare("Linux Kernel")!=0) {            
             if (need_update) {
                 clear();
-                mvprintw(0,0,(char*)"Loading Versions...");
+                printw("Loading...");
                 refresh();
-                distro=menu.at(selected+1);
-                menu = get_data(distro, distro+" getvers","Select Version:");
+                if (current==1) {
+                    menu = get_data(distro, distro+" getvers","Select Versions:");
+                }
+                if (current==2) {
+                    version=menu.at(selected+1);
+                    std::vector<std::string> filesWLinks = get_data(distro, distro+" getfiles "+version,"Select:");
+                    menu.clear();
+                    for (int i=0; i<filesWLinks.size(); i++) {
+                        if (i%2==1 || i==0) {
+                            menu.push_back(filesWLinks.at(i));
+                        }
+                        else links.push_back(filesWLinks.at(i));
+                    }
+                }
                 bottom=menu.size()-1;
                 need_update = false;
                 clear();
                 refresh();
             }
-            dialog(menu,menu.size(),distro);
+            dialog(menu,menu.size(),1);
         }
-        if (current==2) {
+        if (distro.compare("Linux Kernel")==0) {
             if (need_update) {
                 clear();
-                mvprintw(0,0,(char*)"Loading Files...");
-                refresh();
-                version=menu.at(selected+1);
-                std::vector<std::string> filesWLinks = get_data(distro,distro+" getfiles "+version,"Select File:");
-                for (int i=0; i<filesWLinks.size(); i++) {
-                    if (i%2==1 || i==0) files.push_back(filesWLinks.at(i));
-                    else links.push_back(filesWLinks.at(i));
-                }
-                bottom=files.size()-1;
+                printw("Loading...");
+                menu=get_data(distro,distro+" "+current_url,current_url);
+                bottom=menu.size()-2;
                 need_update=false;
-                clear();
-                refresh();
             }
-            dialog(files,files.size(),distro);
+            dialog(menu,menu.size(),2);
         }
         update_selection(mainWindow);
         refresh();
     }
     cleanup(mainWindow);
-    download_file(links.at(current_selection), files.at(current_selection+1));
+    download_file(links.at(current_selection), menu.at(current_selection+1));
     return 0;
 }
