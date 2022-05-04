@@ -10,10 +10,10 @@ bool need_update=true;
 int key; // Key id
 int current=0; // Current menu
 int current_selection=0; // Selected item
-int selected; // Selection from last menu
 int bottom; // Bottom location (length of menu list)
 std::vector<std::string> menu;
 std::string current_url = "/pub/";
+std::string version;
 std::string distro = "";
 
 // Constants
@@ -38,6 +38,7 @@ void update_selection(WINDOW * mainWindow) {
             if (current_selection>0) current_selection--;
             break;
         case 10:
+            if (current==2 && distro.compare("Linux Kernel")!=0) version=menu.at(current_selection+1);
             if (current < 3 && !(distro.compare("Linux Kernel")==0)) {
                 current++;
                 need_update=true;
@@ -47,7 +48,7 @@ void update_selection(WINDOW * mainWindow) {
                 current++;
                 need_update=true;
             }
-            selected=current_selection;
+            if (current==1 && distro.compare("")==0) distro=menu.at(current_selection+1); 
             if (current==3 && !(distro.compare("Linux Kernel")==0)) running=false;
             else current_selection=0;
             clear();
@@ -136,7 +137,6 @@ void download_file(std::string downUrl, std::string filename) {
 
 int main() {
     std::vector<std::string> links;
-    std::string version;
     WINDOW * mainWindow;
     if ((mainWindow = initscr()) == NULL) {
         std::cout << "Failed to start ncurses" << std::endl;
@@ -160,10 +160,6 @@ int main() {
             }
             dialog(menu,menu.size(),1); 
         }
-        if (current==1 && distro.compare("")==0) {
-            distro=menu.at(selected+1);
-            printw(distro.c_str());
-        }
         // Every distro besides Linux Kernel
         if (distro.compare("Linux Kernel")!=0) {            
             if (need_update) {
@@ -174,7 +170,6 @@ int main() {
                     menu = get_data(distro, distro+" getvers","Select Versions:");
                 }
                 if (current==2) {
-                    version=menu.at(selected+1);
                     std::vector<std::string> filesWLinks = get_data(distro, distro+" getfiles "+version,"Select File:");
                     menu.clear();
                     for (int i=0; i<filesWLinks.size(); i++) {
