@@ -151,6 +151,7 @@ int main() {
     curs_set(0);
     clear();
     while (running) {
+        // Main screen for everything
         if (current==0) {
             if (need_update) {
                 menu=get_data("","menu","Select a Distro:");
@@ -163,6 +164,7 @@ int main() {
             distro=menu.at(selected+1);
             printw(distro.c_str());
         }
+        // Every distro besides Linux Kernel
         if (distro.compare("Linux Kernel")!=0) {            
             if (need_update) {
                 clear();
@@ -173,7 +175,7 @@ int main() {
                 }
                 if (current==2) {
                     version=menu.at(selected+1);
-                    std::vector<std::string> filesWLinks = get_data(distro, distro+" getfiles "+version,"Select:");
+                    std::vector<std::string> filesWLinks = get_data(distro, distro+" getfiles "+version,"Select File:");
                     menu.clear();
                     for (int i=0; i<filesWLinks.size(); i++) {
                         if (i%2==1 || i==0) {
@@ -189,6 +191,8 @@ int main() {
             }
             dialog(menu,menu.size(),1);
         }
+        // For the linux kernel
+        // Basically a file server browser
         if (distro.compare("Linux Kernel")==0) {
             if (need_update) {
                 clear();
