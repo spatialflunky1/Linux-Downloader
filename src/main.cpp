@@ -12,7 +12,7 @@ int current=0; // Current menu
 int current_selection=0; // Selected item
 int bottom; // Bottom location (length of menu list)
 std::vector<std::string> menu;
-std::string current_url = "/pub/";
+std::string current_url = "/pub/linux/kernel/";
 std::string version;
 std::string distro = "";
 
@@ -44,12 +44,24 @@ void update_selection(WINDOW * mainWindow) {
                 need_update=true;
             }
             if (distro.compare("Linux Kernel")==0) {
-                current_url+=menu.at(current_selection+2);
-                current++;
-                need_update=true;
+                if (menu.at(current_selection+2).compare("../")==0) {
+                    while (true) {
+                        current_url.pop_back();
+                        if (current_url.back()=='/') break;
+                    }
+                }
+                else current_url+=menu.at(current_selection+2);
+                if (current_url.back() != '/') {
+                    running=false;
+                    cleanup(mainWindow);
+                }
+                else {
+                    current++;
+                    need_update=true;
+                }
             }
             if (current==1 && distro.compare("")==0) distro=menu.at(current_selection+1); 
-            if (current==3 && !(distro.compare("Linux Kernel")==0)) running=false;
+            if (current==3 && distro.compare("Linux Kernel")!=0) running=false;
             else current_selection=0;
             clear();
             break;
@@ -105,6 +117,8 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
 }
 
 void download_file(std::string downUrl, std::string filename) {
+    std::cout << downUrl << "\n";
+    std::cout << filename << "\n";
     // vars
     CURL *easyhandle;    
     const char *pagefilename = filename.c_str();
@@ -202,6 +216,7 @@ int main() {
         refresh();
     }
     cleanup(mainWindow);
-    download_file(links.at(current_selection), menu.at(current_selection+1));
+    if (distro.compare("Ubuntu")==0) download_file(links.at(current_selection), menu.at(current_selection+1));
+    if (distro.compare("Linux Kernel")==0) download_file("https://mirrors.edge.kernel.org"+current_url, menu.at(current_selection));
     return 0;
 }
