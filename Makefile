@@ -1,19 +1,29 @@
-INSTALL = install
-DESTDIR ?= /
-PREFIX = ?= $(DESTDIR)/usr
-MAKE = make
-PATH_INST = $(PREFIX)/bin
+LIBS=\
+	 -lncurses\
+	 -ltinfo\
+	 -lssl\
+	 -lcrypto\
+	 -lcurl
 
-all:
-	$(MAKE) -C src all
-	mkdir -p ./bin
-	mv ./src/lidown ./bin/
+OBJS=\
+	 network.o\
+	 main.o
 
-intstall:
-	echo "not a stable build so not installing yet"
+all: obj lidown
 
-uninstall:
-	echo "dude its not even installed"
+lidown: $(OBJS:%=obj/%)
+	g++ $(LIBS) -o $@ $^
+
+obj/%.o: src/%.cpp
+	g++ -c -o $@ $<
+
+obj: 
+	mkdir -p obj
 
 clean:
-	rm -rf bin
+	rm -f $(OBJS:%=obj/%)
+	rm -f lidown
+	rmdir obj
+
+obj/main.o: src/main.cpp src/httplib.h src/network.h
+obj/network.o: src/network.cpp src/network.h
