@@ -1,8 +1,8 @@
 #define CPPHTTPLIB_OPENSSL_SUPPORT
-#include "httplib.h"
 #include <ncurses.h>
 #include <iostream>
 #include "network.h"
+#include "window.h"
 
 // Global Vars
 bool running=true;
@@ -15,17 +15,6 @@ std::vector<std::string> menu;
 std::string current_url = "/pub/linux/kernel/";
 std::string version;
 std::string distro = "";
-
-// Constants
-const std::string url = "72.231.177.233"; // IP of my server
-const int port = 80; // Port of my server
-
-void cleanup(WINDOW * mainWindow) {
-    delwin(mainWindow);
-    endwin(); // exit curses mode
-    printf("\x1b[2J"); // clear screen
-    printf("\x1b[d"); // return to home position
-}
 
 void update_selection(WINDOW * mainWindow) {
     key = getch();
@@ -85,32 +74,6 @@ void dialog(std::vector<std::string> menu, int length, int title_length) {
     refresh();
 }
 
-std::vector<std::string> get_data(std::string distro, std::string request,std::string title) {
-    std::vector<std::string> menu;
-    httplib::Client cli(url,port);
-    auto res = cli.Post("/", request, "text/plain");
-    // If data gets returned
-    if (res) {
-        std::string body_text = res->body;
-        if (distro.compare("Linux Kernel")==0) menu.push_back("https://mirrors.edge.kernel.org/");
-        menu.push_back(title);
-        std::stringstream s_stream(body_text);
-        while (s_stream.good()) {
-            std::string substr;
-            getline(s_stream,substr,',');
-            menu.push_back(substr);
-        }
-    }
-    // If no data is returned print the error
-    else {
-        std::string message = (std::string)"Error: "+httplib::to_string(res.error())+(std::string)"\n";
-        endwin();
-        std::cout << message << std::endl;
-        exit(0);
-    }
-    return menu;
-}
-
 int main() {
     std::vector<std::string> links;
     WINDOW * mainWindow;
@@ -130,7 +93,7 @@ int main() {
         // Main screen for everything
         if (current==0) {
             if (need_update) {
-                menu=get_data("","menu","Select a Distro:");
+                menu=get_data("","menu","Select a Distro:", mainWindow);
                 bottom=menu.size()-1;
                 need_update=false;
             }
@@ -143,10 +106,10 @@ int main() {
                 printw("Loading...");
                 refresh();
                 if (current==1) {
-                    menu = get_data(distro, distro+" getvers","Select Versions:");
+                    menu = get_data(distro, distro+" getvers","Select Versions:", mainWindow);
                 }
                 if (current==2) {
-                    std::vector<std::string> filesWLinks = get_data(distro, distro+" getfiles "+version,"Select File:");
+                    std::vector<std::string> filesWLinks = get_data(distro, distro+" getfiles "+version,"Select File:", mainWindow);
                     menu.clear();
                     for (int i=0; i<filesWLinks.size(); i++) {
                         if (i%2==1 || i==0) {
@@ -168,7 +131,7 @@ int main() {
             if (need_update) {
                 clear();
                 printw("Loading...");
-                menu=get_data(distro,distro+" "+current_url,current_url);
+                menu=get_data(distro,distro+" "+current_url,current_url, mainWindow);
                 bottom=menu.size()-2;
                 need_update=false;
             }

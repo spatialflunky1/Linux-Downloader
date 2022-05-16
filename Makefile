@@ -7,6 +7,7 @@ LIBS=\
 
 OBJS=\
 	 network.o\
+	 window.o\
 	 main.o
 
 all: obj lidown
@@ -25,5 +26,6 @@ clean:
 	rm -f lidown
 	rmdir obj
 
-obj/main.o: src/main.cpp src/httplib.h src/network.h
-obj/network.o: src/network.cpp src/network.h
+obj/main.o: src/main.cpp src/network.h src/window.h src/httplib.h
+obj/network.o: src/network.cpp src/network.h src/window.h src/httplib.h
+obj/window.o: src/window.cpp
