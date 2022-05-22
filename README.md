@@ -1,15 +1,17 @@
-# Linux-Downloader
+# Linux Downloader
 Linux downloader is a command line interface for downloading any Linux distro
 
 ### Notes
-* Title sometimes duplicates when running over SSH
+* If you want to use the server included in the source files, run `python3 server.py {port}` and change the url/port in `src/network.cpp`
 
 ## Planned features:
-* Wrap text when offscreen at bottom
+* Wrap text when offscreen at bottom (almost working, need to add scrolling too for when files offscreen)
+* Huge rewrite for splitting all of website data processing to python
+* On the above note, once program is completely finished, implement all python features into the program so no server is needed
 
 ## Supported Distros:
 - [x] Ubuntu
-- [ ] Linux Kernel Source 
+- [x] Linux Kernel Source (in progress)
 - [ ] Arch
 - [ ] Gentoo
 
