@@ -33,3 +33,6 @@
 
 # my testing files
 test/*
+
+# from the server
+__pycache__/
