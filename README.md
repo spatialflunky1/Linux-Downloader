@@ -9,6 +9,11 @@ Linux downloader is a command line interface for downloading any Linux distro
 * Huge rewrite for splitting all of website data processing to python
 * On the above note, once program is completely finished, implement all python features into the program so no server is needed
 
+## To compile:
+```
+make
+```
+
 ## Supported Distros:
 - [x] Ubuntu
 - [x] Linux Kernel Source (in progress)
