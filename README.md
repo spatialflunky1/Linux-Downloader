@@ -4,6 +4,7 @@ Linux downloader is a command line interface for downloading any Linux distro
 ### Notes
 * If you want to use the server included in the source files, run `python3 server.py {port}` and change the url/port in `src/network.cpp`
 * This project is on hold
+* Need to remake the repo as previous commits have public ip
 
 ## Planned features:
 * Wrap text when offscreen at bottom (almost working, need to add scrolling too for when files offscreen)
