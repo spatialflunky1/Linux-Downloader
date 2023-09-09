@@ -1,7 +1,8 @@
 #include <cstddef>
 #include <iostream>
 #include <vector>
-#include <ncurses.h>
+#include <curl/curl.h>
+#include <cstring>
 #include "window.h"
 #include "httplib.h"
 

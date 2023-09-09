@@ -1,4 +1,4 @@
-#include <ncurses.h>
+#include "window.h"
 
 void cleanup(WINDOW * mainWindow) {
     delwin(mainWindow);

@@ -1,8 +1,4 @@
 #include "network.h"
-#include <curl/curl.h>
-#include <iostream>
-#include <cstring>
-#include <ncurses.h>
 
 // Constants
 const std::string url = "72.231.177.233"; // IP of my server
