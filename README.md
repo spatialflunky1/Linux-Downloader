@@ -1,15 +1,8 @@
 # Linux Downloader
-Linux downloader is a command line interface for downloading any Linux distro
+Linux downloader is a terminal user interface (tui) for downloading any Linux distro
 
 ### Notes
-* If you want to use the server included in the source files, run `python3 server.py {port}` and change the url/port in `src/network.cpp`
-* This project is on hold
-* Need to remake the repo as previous commits have public ip
-
-## Planned features:
-* Wrap text when offscreen at bottom (almost working, need to add scrolling too for when files offscreen)
-* Huge rewrite for splitting all of website data processing to python
-* On the above note, once program is completely finished, implement all python features into the program so no server is needed
+  * Current codebase compiles but will not work as this project is under a complete rewrite and is no longer going for the server/client approach
 
 ## To compile:
 ```
@@ -17,10 +10,7 @@ make
 ```
 
 ## Supported Distros:
-- [x] Ubuntu
-- [x] Linux Kernel Source (in progress)
 - [ ] Arch
 - [ ] Gentoo
-
-## Credit:
-[httplib.h](https://github.com/yhirose/cpp-httplib)
+- [ ] Ubuntu
+- [ ] Linux Kernel Source (in progress)
