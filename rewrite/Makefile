@@ -1,5 +1,6 @@
 LIBS=\
 	 -lncurses\
+	 -ltinfo
 
 OBJS=\
 	 window.o\
@@ -8,7 +9,7 @@ OBJS=\
 all: obj lidown
 
 lidown: $(OBJS:%=obj/%)
-	gcc $(LIBS) -o $@ $^
+	gcc -o $@ $^ $(LIBS)
 
 obj/%.o: src/%.c
 	gcc -c -o $@ $<
