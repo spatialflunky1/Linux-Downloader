@@ -1,6 +1,6 @@
 #include "window.h"
 
-void update_selection(WINDOW* mainWindow, int* running) {
+void update_selection(WINDOW* mainWindow, int* running, int* selection) {
     // KEYS:
     // 113: Q
     // 66:  down arrow
@@ -24,10 +24,12 @@ void cleanup(WINDOW* mainWindow) {
 
 void dialog(char** menu, int len, int title_len, int height, int width) {
     int line = 1;
-    mvprintw(0, 0, menu[0]);
+    attron(COLOR_PAIR(3));
+    mvprintw(0, 0, "%s", menu[0]);
+    attron(COLOR_PAIR(2));
     for (int i = title_len; i < len; i++) {
-        //mvprintw(0, width-strlen(menu[i])-1, menu[i]);
-        mvprintw(line+title_len, 0, menu[i]);
+        mvprintw(line+title_len, 0, "%s", menu[i]);
+        if (i == title_len) attron(COLOR_PAIR(1));
         line++;
     }
     refresh();

@@ -74,7 +74,7 @@ int main(void) {
                 update = 0;
             }
         }
-        update_selection(mainWindow, &running);
+        update_selection(mainWindow, &running, &selection);
         refresh(); // Refresh curses window
     }
     cleanup(mainWindow);
