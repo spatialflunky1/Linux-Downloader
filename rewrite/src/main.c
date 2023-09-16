@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "window.h"
 
 void menu_append(char* menuItem, char*** menu, int* len) {
@@ -23,14 +22,13 @@ void menu_append(char* menuItem, char*** menu, int* len) {
 }
 
 int main(void) {
-    // Create the first menu
-    char** firstMenu = NULL;
-    int firstMenu_len = 0;
-    menu_append("Select a Distro:", &firstMenu, & firstMenu_len);
-    menu_append("Arch", &firstMenu, & firstMenu_len);
-    menu_append("Gentoo", &firstMenu, & firstMenu_len);
-    menu_append("Ubuntu", &firstMenu, & firstMenu_len);
-    menu_append("Linux Kernel", &firstMenu, & firstMenu_len);
+    char *firstMenu[5];
+    firstMenu[0] = "Select a Distro:";
+    firstMenu[1] = "Arch";
+    firstMenu[2] = "Gentoo";
+    firstMenu[3] = "Ubuntu";
+    firstMenu[4] = "Linux Kernel";
+    int firstMenu_len = 5;
 
     WINDOW* mainWindow;
     int width;
@@ -49,6 +47,8 @@ int main(void) {
     // 3: Ubuntu
     // 4: Linux Kernel
     int distro = 0;
+    // 1: Update screen on next loop
+    int update = 1;
     if ((mainWindow = initscr()) == NULL) {
         fprintf(stderr, "Failed to start ncurses\n");
         return 1;
@@ -69,7 +69,10 @@ int main(void) {
     while (running) {
         if (menu == 0) {
             // Select a Distro:
-            dialog(firstMenu, firstMenu_len, 16, height, width);
+            if (update) {
+                dialog(firstMenu, firstMenu_len, 1, height, width);
+                update = 0;
+            }
         }
         update_selection(mainWindow, &running);
         refresh(); // Refresh curses window

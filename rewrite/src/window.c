@@ -23,5 +23,12 @@ void cleanup(WINDOW* mainWindow) {
 }
 
 void dialog(char** menu, int len, int title_len, int height, int width) {
-
+    int line = 1;
+    mvprintw(0, 0, menu[0]);
+    for (int i = title_len; i < len; i++) {
+        //mvprintw(0, width-strlen(menu[i])-1, menu[i]);
+        mvprintw(line+title_len, 0, menu[i]);
+        line++;
+    }
+    refresh();
 }
