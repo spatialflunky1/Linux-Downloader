@@ -1,22 +1,18 @@
 LIBS=\
 	 -lncurses\
-	 -ltinfo\
-	 -lssl\
-	 -lcrypto\
-	 -lcurl
+	 -ltinfo
 
 OBJS=\
-	 network.o\
 	 window.o\
 	 main.o
 
 all: obj lidown
 
 lidown: $(OBJS:%=obj/%)
-	g++ $(LIBS) -o $@ $^
+	gcc -o $@ $^ $(LIBS)
 
-obj/%.o: src/%.cpp
-	g++ -c -o $@ $<
+obj/%.o: src/%.c
+	gcc -c -o $@ $<
 
 obj: 
 	mkdir -p obj
@@ -26,6 +22,5 @@ clean:
 	rm -f lidown
 	rmdir obj
 
-obj/main.o: src/main.cpp src/network.h src/window.h src/httplib.h
-obj/network.o: src/network.cpp src/network.h src/window.h src/httplib.h
-obj/window.o: src/window.cpp
+obj/main.o: src/main.c src/window.h
+obj/window.o: src/window.c
