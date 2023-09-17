@@ -2,7 +2,7 @@
 Linux downloader is a terminal user interface (tui) for downloading any Linux distro
 
 ### Notes
-  * Current codebase compiles but will not work as this project is under a complete rewrite and is no longer going for the server/client approach
+  * This project is under a complete rewrite and is currently incomplete
 
 ## To compile:
 ```
