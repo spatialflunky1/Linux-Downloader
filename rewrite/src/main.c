@@ -23,12 +23,11 @@ void menu_append(char* menuItem, char*** menu, int* len) {
 
 int main(void) {
     char *firstMenu[5];
-    firstMenu[0] = "Select a Distro:";
+    firstMenu[0] = "Select a Distribution:";
     firstMenu[1] = "Arch";
     firstMenu[2] = "Gentoo";
     firstMenu[3] = "Ubuntu";
     firstMenu[4] = "Linux Kernel";
-    int firstMenu_len = 5;
 
     WINDOW* mainWindow;
     int width;
@@ -39,7 +38,7 @@ int main(void) {
     int selection = 0;
     // Current menu
     // 0: Select distro
-    int menu = 0;
+    int menu_num = 0;
     // Selected distro
     // 0: None
     // 1: Arch
@@ -49,6 +48,11 @@ int main(void) {
     int distro = 0;
     // 1: Update screen on next loop
     int update = 1;
+
+    // General variables to be set
+    char** menu = firstMenu;
+    int menu_len = 5;
+    int title_len = 1;
     if ((mainWindow = initscr()) == NULL) {
         fprintf(stderr, "Failed to start ncurses\n");
         return 1;
@@ -67,14 +71,14 @@ int main(void) {
     clear();
     // Main loop
     while (running) {
-        if (menu == 0) {
+        if (menu_num == 0) {
             // Select a Distro:
             if (update) {
-                dialog(firstMenu, firstMenu_len, 1, height, width);
+                dialog(menu, menu_len, title_len, height, width, selection);
                 update = 0;
             }
         }
-        update_selection(mainWindow, &running, &selection);
+        update_selection(mainWindow, &running, &selection, &update, menu_len - title_len - 1);
         refresh(); // Refresh curses window
     }
     cleanup(mainWindow);
