@@ -1,8 +1,8 @@
 #include "network.h"
 
 // Constants
-const std::string url = "72.231.177.233"; // IP of my server
-const int port = 80; // Port of my server
+const std::string url = ""; // IP here
+const int port = 80; // Port here
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
     size_t written = fwrite(ptr,size,nmemb, (FILE *)stream);
