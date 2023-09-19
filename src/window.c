@@ -1,6 +1,6 @@
 #include "window.h"
 
-void update_selection(WINDOW* mainWindow, int* running, int* selection, int* update, int upperbound) {
+void update_selection(WINDOW* mainWindow, int* running, int* selection, int* update, int upperbound, int* selected) {
     // KEYS:
     // 113: Q
     // 66:  down arrow
@@ -21,6 +21,9 @@ void update_selection(WINDOW* mainWindow, int* running, int* selection, int* upd
             // Up is down
             if (*selection < upperbound) (*selection)++;
             *update = 1;
+            break;
+        case 10:
+            *selected = 1;
             break;
     }
 }

@@ -36,8 +36,11 @@ int main(void) {
     int running = 1;
     // Selected menu item 
     int selection = 0;
+    // Indicates enter key pressed
+    int selected = 0;
     // Current menu
     // 0: Select distro
+    // 1: Arch (ex. x86, NOT the distro)
     int menu_num = 0;
     // Selected distro
     // 0: None
@@ -77,11 +80,19 @@ int main(void) {
                 dialog(menu, menu_len, title_len, height, width, selection);
                 update = 0;
             }
+            if (selected) {
+                selected = 0;
+                distro = selection;
+                selection = 0;
+                menu_num = 1;
+                break;
+            }
         }
-        update_selection(mainWindow, &running, &selection, &update, menu_len - title_len - 1);
+        update_selection(mainWindow, &running, &selection, &update, menu_len - title_len - 1, &selected);
         refresh(); // Refresh curses window
     }
     cleanup(mainWindow);
+    if (menu_num == 1) printf("%s\n", menu[distro + title_len]);
 
     return 0;
 }
