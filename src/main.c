@@ -84,7 +84,8 @@ int main(void) {
                 selected = 0;
                 distro = selection;
                 selection = 0;
-                menu_num = 1;
+                if (distro == 0) menu_num = 2;
+                else menu_num = 1;
                 break;
             }
         }
