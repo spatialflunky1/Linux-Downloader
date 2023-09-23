@@ -16,24 +16,29 @@ size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata) {
 
 // Find reason for segfault
 void append_string(char c, char** string, int* len) {
-    char* new = malloc(((*len) + 1) * sizeof(char));
-    if (new == NULL) {
+    printf("Appending: %c\n", c);
+    *string = realloc(*string, ((*len) + 1) * sizeof(char));
+    if (*string == NULL) {
         fprintf(stderr, "Unable to allocate memory\n");
         exit(1);
     }
-    strcpy(new, *string);
-    if (*string != NULL) free(*string);
-    new[(*len)] = c;
+    (*string)[*len] = c;
     (*len)++;
-    *string = new;
 }
 
 void append_string_array(char* s, char*** array, int* len) {
-
+    *array = realloc(*array, ((*len) + 1) * sizeof(char*));
+    if (*array == NULL) {
+        fprintf(stderr, "Unable to allocate memory\n");
+        exit(1);
+    }
+    (*array)[*len] = s;
+    (*len)++;
 }
 
 int main(void) {
     char** files = NULL;
+    int files_len = 0;
     CURL* handle;
     handle = curl_easy_init(); // CURL easy handle
     if (handle) {
@@ -55,15 +60,22 @@ int main(void) {
                 else {
                     i++;
                     inside = 1;
+                    //if (tmp != NULL) printf("%s\n", tmp);
+                    append_string_array(tmp, &files, &files_len);
+                    tmp = NULL;
                 }
             }
             if (inside) 
                 append_string(html_body[i], &tmp, &tmp_len);
         }
-        
-        putchar('\n');
-
         if (html_body != NULL) free(html_body);
+        /*
+        for (int i = 0; i < files_len; i++) {
+            printf("%s\n", files[i]);
+            free(files[i]);
+        }
+        free(files);
+        */
     }
     else fprintf(stderr, "Error!\n");
     return 0;
