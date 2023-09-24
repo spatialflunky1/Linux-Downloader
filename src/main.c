@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "window.h"
+#include "network.h"
 
 void menu_append(char* menuItem, char*** menu, int* len) {
     char** newMenu = malloc((*len) + 1);
@@ -82,9 +83,9 @@ int main(void) {
             }
             if (selected) {
                 selected = 0;
-                distro = selection;
+                distro = selection + 1;
                 selection = 0;
-                if (distro == 0) menu_num = 2;
+                if (distro == 1) menu_num = 2;
                 else menu_num = 1;
                 break;
             }
@@ -93,7 +94,18 @@ int main(void) {
         refresh(); // Refresh curses window
     }
     cleanup(mainWindow);
-    if (menu_num == 1) printf("%s\n", menu[distro + title_len]);
+    if (menu_num == 1) printf("%s\n", menu[distro + title_len - 1]);
+    else if (menu_num == 2) {
+        char** files = NULL;
+        int files_len = 0;
+        get_files(distro, &files, &files_len);
+
+        for (int i = 0; i < files_len; i++) {
+            printf("%s\n", files[i]);
+            free(files[i]);
+        }
+        free(files);
+    }
 
     return 0;
 }
