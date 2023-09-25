@@ -37,7 +37,7 @@ void get_arch_files(char*** files, int* files_len) {
         if (html_body[i] == '"') {
             if (inside == 1) {
                 append_string('\0', &tmp, &tmp_len);
-                append_string_array(tmp, files, files_len);
+                if (strstr(tmp, "/") == NULL) append_string_array(tmp, files, files_len);
                 tmp = NULL;
                 tmp_len = 0;
                 inside = 0;
