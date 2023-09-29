@@ -83,6 +83,8 @@ int main(void) {
         }
         if (selected) {
             selected = 0;
+            // so the next menu is drawn onscreen
+            update = 1;
             distro = selection + 1;
             selection = 0;
             if (distro == 1) menu_num = 3;
@@ -90,6 +92,7 @@ int main(void) {
             break;
         }
         update_selection(mainWindow, &running, &selection, &update, FIRSTMENU_LEN - 2, &selected);
+        clear();
         refresh(); // Refresh curses window
     }
     if (menu_num == 1) {
@@ -104,19 +107,20 @@ int main(void) {
         // Select file
         char** files = NULL;
         int files_len = 0;
+        append_string_array("Select File:", &files, &files_len);
         get_files(distro, &files, &files_len);
         
-        /*
         while (running) {
             if (update) {
-                
+                dialog(files, files_len, height, width, selection);
+                update = 0;
             }
-            //update_selection();
+            update_selection(mainWindow, &running, &selection, &update, files_len - 2, &selected);
             refresh();
         }
-        */
 
-        for (int i = 0; i < files_len; i++) {
+        // start at 1, cant free text segment string
+        for (int i = 1; i < files_len; i++) {
             free(files[i]);
         }
         free(files);
