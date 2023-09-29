@@ -3,6 +3,8 @@
 #include "window.h"
 #include "network.h"
 
+#define FIRSTMENU_LEN 5
+
 void menu_append(char* menuItem, char*** menu, int* len) {
     char** newMenu = malloc((*len) + 1);
     if (newMenu == NULL) {
@@ -42,6 +44,8 @@ int main(void) {
     // Current menu
     // 0: Select distro
     // 1: Arch (ex. x86, NOT the distro)
+    // 2: Version
+    // 3: Files
     int menu_num = 0;
     // Selected distro
     // 0: None
@@ -54,8 +58,6 @@ int main(void) {
     int update = 1;
 
     // General variables to be set
-    char** menu = firstMenu;
-    int menu_len = 5;
     int title_len = 1;
     if ((mainWindow = initscr()) == NULL) {
         fprintf(stderr, "Failed to start ncurses\n");
@@ -75,37 +77,55 @@ int main(void) {
     clear();
     // Main loop
     while (running) {
-        if (menu_num == 0) {
-            // Select a Distro:
-            if (update) {
-                dialog(menu, menu_len, title_len, height, width, selection);
-                update = 0;
-            }
-            if (selected) {
-                selected = 0;
-                distro = selection + 1;
-                selection = 0;
-                if (distro == 1) menu_num = 2;
-                else menu_num = 1;
-                break;
-            }
+        // Select a Distro:
+        if (update) {
+            // Menu/title len is constant so plugged in so as not to create an unnessesary
+            dialog(firstMenu, 5, height, width, selection);
+            update = 0;
         }
-        update_selection(mainWindow, &running, &selection, &update, menu_len - title_len - 1, &selected);
+        if (selected) {
+            selected = 0;
+            distro = selection + 1;
+            selection = 0;
+            if (distro == 1) menu_num = 3;
+            else menu_num = 1;
+            break;
+        }
+        update_selection(mainWindow, &running, &selection, &update, FIRSTMENU_LEN - title_len - 1, &selected);
         refresh(); // Refresh curses window
     }
-    cleanup(mainWindow);
-    if (menu_num == 1) printf("%s\n", menu[distro + title_len - 1]);
+    if (menu_num == 1) {
+        // Get architecture
+        // printf("%s\n", menu[distro + title_len - 1]);
+    }
+
     else if (menu_num == 2) {
+        // Get version
+    
+    } 
+
+    else if (menu_num == 3) {
+        // Select file
         char** files = NULL;
         int files_len = 0;
         get_files(distro, &files, &files_len);
+        
+        /*
+        while (running) {
+            if (update) {
+                
+            }
+            //update_selection();
+            refresh();
+        }
+        */
 
         for (int i = 0; i < files_len; i++) {
-            printf("%s\n", files[i]);
             free(files[i]);
         }
         free(files);
     }
+    cleanup(mainWindow);
 
     return 0;
 }
