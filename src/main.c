@@ -57,8 +57,6 @@ int main(void) {
     // 1: Update screen on next loop
     int update = 1;
 
-    // General variables to be set
-    int title_len = 1;
     if ((mainWindow = initscr()) == NULL) {
         fprintf(stderr, "Failed to start ncurses\n");
         return 1;
@@ -79,7 +77,7 @@ int main(void) {
     while (running) {
         // Select a Distro:
         if (update) {
-            // Menu/title len is constant so plugged in so as not to create an unnessesary
+            // Menu is constant so plugged in so as not to create an unnessesary
             dialog(firstMenu, 5, height, width, selection);
             update = 0;
         }
@@ -91,17 +89,15 @@ int main(void) {
             else menu_num = 1;
             break;
         }
-        update_selection(mainWindow, &running, &selection, &update, FIRSTMENU_LEN - title_len - 1, &selected);
+        update_selection(mainWindow, &running, &selection, &update, FIRSTMENU_LEN - 2, &selected);
         refresh(); // Refresh curses window
     }
     if (menu_num == 1) {
         // Get architecture
-        // printf("%s\n", menu[distro + title_len - 1]);
     }
 
     else if (menu_num == 2) {
         // Get version
-    
     } 
 
     else if (menu_num == 3) {
