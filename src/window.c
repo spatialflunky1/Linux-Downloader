@@ -28,11 +28,12 @@ void update_selection(WINDOW* mainWindow, int* running, int* selection, int* upd
     }
 }
 
-void cleanup(WINDOW* mainWindow) {
-    delwin(mainWindow);
+int cleanup(WINDOW* mainWindow) {
+    int code = delwin(mainWindow);
     endwin(); // Exit curses mode
     printf("\x1b[2J"); // clear screen
     printf("\x1b[d"); // return to home position
+    return code;
 }
 
 void dialog(char** menu, int len, int height, int width, int selection) {

@@ -86,3 +86,23 @@ void get_files(int distro, char*** files, int* files_len) {
         exit(1);
     }
 }
+
+void download_file(int distro, char* filename) {
+    char* URL = NULL;
+    switch (distro) {
+        case 1:
+            URL = malloc((strlen(ARCH_URL) + 1) * sizeof(char));
+            strcpy(URL, ARCH_URL);
+            if (URL == NULL) {
+                fprintf(stderr, "Unable to allocate memory\n");
+                exit(1);
+            }
+            break;
+    }
+    if (URL == NULL) {
+        fprintf(stderr, "Error!\n");
+        exit(1);
+    }
+    printf("%s%s\n", URL, filename);
+    free(URL);
+}

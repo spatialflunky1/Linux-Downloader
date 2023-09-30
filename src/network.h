@@ -10,3 +10,4 @@ void append_string(char c, char** string, int* len);
 void append_string_array(char* s, char*** array, int* len);
 void get_arch_files(char*** files, int* files_len);
 void get_files(int distro, char*** files, int* files_len);
+void download_file(int distro, char* filename);

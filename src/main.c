@@ -56,7 +56,8 @@ int main(void) {
     int distro = 0;
     // 1: Update screen on next loop
     int update = 1;
-
+    // Window return code
+    int code = 1;
     if ((mainWindow = initscr()) == NULL) {
         fprintf(stderr, "Failed to start ncurses\n");
         return 1;
@@ -115,6 +116,12 @@ int main(void) {
                 dialog(files, files_len, height, width, selection);
                 update = 0;
             }
+
+            if (selected) {
+                code = cleanup(mainWindow);
+                download_file(distro, files[selection + 1]);
+                break;
+            }
             update_selection(mainWindow, &running, &selection, &update, files_len - 2, &selected);
             refresh();
         }
@@ -125,7 +132,7 @@ int main(void) {
         }
         free(files);
     }
-    cleanup(mainWindow);
+    if (code != 0) cleanup(mainWindow);
 
     return 0;
 }
