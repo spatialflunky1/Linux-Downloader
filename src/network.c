@@ -1,4 +1,7 @@
 #include "network.h"
+#include <curl/curl.h>
+#include <curl/easy.h>
+#include <stdio.h>
 
 char* html_body = NULL;
 size_t html_size;
@@ -8,6 +11,11 @@ size_t write_callback_html(char* ptr, size_t size, size_t nmemb, void* userdata)
     strcpy(html_body, ptr);
     html_size = nmemb;
     return size * nmemb;
+}
+
+size_t write_data(void* data, size_t size, size_t nmemb, FILE* stream) {
+    size_t filesize = fwrite(data, size, nmemb, stream);
+    return filesize;
 }
 
 void append_string(char c, char** string, int* len) { 
@@ -105,6 +113,24 @@ void download_file(int distro, char* filename) {
         fprintf(stderr, "Error!\n");
         exit(1);
     }
-    printf("%s\n", URL);
+    
+    CURL* handle;
+    handle = curl_easy_init();
+    if (handle) {
+        CURLcode response;
+        FILE* fptr = fopen(filename, "wb");
+        curl_easy_setopt(handle, CURLOPT_URL, URL);
+        curl_easy_setopt(handle, CURLOPT_WRITEDATA, fptr);
+        curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_data);
+        response = curl_easy_perform(handle);
+
+        curl_easy_cleanup(handle);
+        fclose(fptr);
+    }
+    else {
+        fprintf(stderr, "Curl Error!\n");
+        exit(1);
+    }
+
     free(URL);
 }
