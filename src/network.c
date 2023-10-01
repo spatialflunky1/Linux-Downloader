@@ -3,7 +3,7 @@
 char* html_body = NULL;
 size_t html_size;
 
-size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata) {
+size_t write_callback_html(char* ptr, size_t size, size_t nmemb, void* userdata) {
     html_body = malloc((nmemb + 1) * sizeof(char));
     strcpy(html_body, ptr);
     html_size = nmemb;
@@ -64,7 +64,7 @@ void get_files(int distro, char*** files, int* files_len) {
                 curl_easy_setopt(handle, CURLOPT_URL, ARCH_URL);
                 break;
         }
-        curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_callback);
+        curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_callback_html);
         response = curl_easy_perform(handle);
         if (response != 0) {
             fprintf(stderr, "Network Error!\n");
@@ -92,18 +92,19 @@ void download_file(int distro, char* filename) {
     char* URL = NULL;
     switch (distro) {
         case 1:
-            URL = malloc((strlen(ARCH_URL) + 1) * sizeof(char));
-            strcpy(URL, ARCH_URL);
+            URL = malloc((strlen(ARCH_URL) + strlen(filename) + 1) * sizeof(char));
             if (URL == NULL) {
                 fprintf(stderr, "Unable to allocate memory\n");
                 exit(1);
             }
+            strcpy(URL, ARCH_URL);
+            strcat(URL, filename);
             break;
     }
     if (URL == NULL) {
         fprintf(stderr, "Error!\n");
         exit(1);
     }
-    printf("%s%s\n", URL, filename);
+    printf("%s\n", URL);
     free(URL);
 }
