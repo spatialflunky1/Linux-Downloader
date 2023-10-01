@@ -6,7 +6,8 @@ size_t html_size;
 size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata) {
     html_body = malloc((nmemb + 1) * sizeof(char));
     strcpy(html_body, ptr);
-    html_size = nmemb; 
+    html_size = nmemb;
+    return size * nmemb;
 }
 
 void append_string(char c, char** string, int* len) { 
