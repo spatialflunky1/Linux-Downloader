@@ -123,6 +123,10 @@ void download_file(int distro, char* filename) {
         curl_easy_setopt(handle, CURLOPT_WRITEDATA, fptr);
         curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_data);
         response = curl_easy_perform(handle);
+        if (response != 0) {
+            fprintf(stderr, "Network Error\n");
+            exit(1);
+        }
 
         curl_easy_cleanup(handle);
         fclose(fptr);
