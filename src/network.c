@@ -1,6 +1,7 @@
 #include "network.h"
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <curl/system.h>
 #include <stdio.h>
 
 char* html_body = NULL;
@@ -16,6 +17,14 @@ size_t write_callback_html(char* ptr, size_t size, size_t nmemb, void* userdata)
 size_t write_data(void* data, size_t size, size_t nmemb, FILE* stream) {
     size_t filesize = fwrite(data, size, nmemb, stream);
     return filesize;
+}
+
+int progress_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow) {
+    if (dltotal <= 0.0) return 0;
+    printf("\x1b[d"); // return to home position
+    printf("Downloading... %ld%%\n", dlnow*100/dltotal);
+    fflush(stdout);
+    return 0;
 }
 
 void append_string(char c, char** string, int* len) { 
@@ -122,6 +131,8 @@ void download_file(int distro, char* filename) {
         curl_easy_setopt(handle, CURLOPT_URL, URL);
         curl_easy_setopt(handle, CURLOPT_WRITEDATA, fptr);
         curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_data);
+        curl_easy_setopt(handle, CURLOPT_XFERINFOFUNCTION, progress_callback);
+        curl_easy_setopt(handle, CURLOPT_NOPROGRESS, 0);
         response = curl_easy_perform(handle);
         if (response != 0) {
             fprintf(stderr, "Network Error\n");
