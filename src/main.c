@@ -79,6 +79,7 @@ int main(void) {
         // Select a Distro:
         if (update) {
             // Menu is constant so plugged in so as not to create an unnessesary
+            clear();
             dialog(firstMenu, 5, height, width, selection);
             update = 0;
         }
@@ -93,7 +94,6 @@ int main(void) {
             break;
         }
         update_selection(mainWindow, &running, &selection, &update, FIRSTMENU_LEN - 2, &selected);
-        clear();
         refresh(); // Refresh curses window
     }
     if (menu_num == 1) {
