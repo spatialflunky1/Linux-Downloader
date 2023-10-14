@@ -47,6 +47,66 @@ void append_string_array(char* s, char*** array, int* len) {
     (*len)++;
 }
 
+void get_gentoo_archs(char*** archs, int* archs_len) {
+    int in_line = 0;
+    int num_close = 0;
+    char* arch = NULL;
+    int arch_len = 0;
+    for (int i = 0; i < html_size; i++) {
+        if (html_body[i] == '[' && i < html_size - 4 && html_body[i+1] == 'D' && html_body[i+2] == 'I' && html_body[i+3] == 'R' && html_body[i+4] == ']') {
+            in_line = 1;
+        }
+        else if (in_line){
+            if (html_body[i] == '>') {
+                num_close++;
+                i++;
+            }
+            else if (num_close == 4 && html_body[i] == '/') {
+                in_line = 0;
+                num_close = 0;
+                append_string('\0', &arch, &arch_len);
+                append_string_array(arch, archs, archs_len);
+                arch = NULL;
+                arch_len = 0;
+            }
+        }
+
+        if (num_close == 4) append_string(html_body[i], &arch, &arch_len);
+   }
+}
+
+void get_archs(int distro, char ***archs, int* archs_len) {
+    CURL* handle;
+    handle = curl_easy_init();
+    if (handle) {
+        CURLcode response;
+        switch (distro) {
+            case 2:
+                curl_easy_setopt(handle, CURLOPT_URL, GENTOO_ARCHS_URL);
+                break;
+        }
+        curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_callback_html);
+        response = curl_easy_perform(handle);
+        if (response != 0) {
+            fprintf(stderr, "Network Error!\n");
+            exit(1);
+        }
+        curl_easy_cleanup(handle);
+
+        switch (distro) {
+            case 2:
+                get_gentoo_archs(archs, archs_len);
+                break;
+        }
+
+        if (html_body != NULL) free(html_body);
+    }
+    else {
+        fprintf(stderr, "Curl Error!\n");
+        exit(1);
+    }
+}
+
 void get_arch_files(char*** files, int* files_len) {
     int inside = 0;
     char* tmp = NULL;

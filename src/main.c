@@ -97,14 +97,23 @@ int main(void) {
         refresh(); // Refresh curses window
     }
     if (menu_num == 1) {
+        char** archs = NULL;
+        int archs_len = 0;
+        append_string_array("Select Architecture: ", &archs, &archs_len);
+        cleanup(mainWindow);
+        get_archs(distro, &archs, &archs_len);
+        for (int i = 0; i < archs_len; i++) {
+            printf("%s\n", archs[i]);
+        }
         // Get architecture
     }
 
-    else if (menu_num == 2) {
+    if (menu_num == 2) {
         // Get version
+        // For ubuntu/kern
     } 
 
-    else if (menu_num == 3) {
+    if (menu_num == 3) {
         // Select file
         char** files = NULL;
         int files_len = 0;
