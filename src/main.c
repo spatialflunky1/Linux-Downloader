@@ -97,15 +97,23 @@ int main(void) {
         refresh(); // Refresh curses window
     }
     if (menu_num == 1) {
+        // Get architecture
         char** archs = NULL;
         int archs_len = 0;
         append_string_array("Select Architecture: ", &archs, &archs_len);
-        cleanup(mainWindow);
         get_archs(distro, &archs, &archs_len);
-        for (int i = 0; i < archs_len; i++) {
-            printf("%s\n", archs[i]);
+        while (running) {
+            if (update) {
+                dialog(archs, archs_len, height, width, selection);
+                update = 0;
+            }
+            if (selected) {
+                cleanup(mainWindow);
+                return 0;
+            }
+            update_selection(mainWindow, &running, &selection, &update, archs_len - 2, &selected);
+            refresh();
         }
-        // Get architecture
     }
 
     if (menu_num == 2) {
@@ -125,7 +133,6 @@ int main(void) {
                 dialog(files, files_len, height, width, selection);
                 update = 0;
             }
-
             if (selected) {
                 code = cleanup(mainWindow);
                 download_file(distro, files[selection + 1]);
