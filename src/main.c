@@ -79,11 +79,11 @@ int main(void) {
         // Select a Distro:
         if (update) {
             // firstMenu is constant so the length is plugged in as not to create an unnessesary variable
-            clear();
             dialog(firstMenu, 5, height, width, selection);
             update = 0;
         }
         if (selected) {
+            clear();
             selected = 0;
             // so the next menu is drawn onscreen
             update = 1;
