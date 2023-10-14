@@ -78,7 +78,7 @@ int main(void) {
     while (running) {
         // Select a Distro:
         if (update) {
-            // Menu is constant so plugged in so as not to create an unnessesary
+            // firstMenu is constant so the length is plugged in as not to create an unnessesary variable
             clear();
             dialog(firstMenu, 5, height, width, selection);
             update = 0;
