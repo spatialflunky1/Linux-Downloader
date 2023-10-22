@@ -37,7 +37,8 @@ int main(void) {
     int height;
     // 0: not running, 1: running
     int running = 1;
-    // Selected menu item 
+    // Selected menu item
+    // Data wise any reference to this variable should be +1
     int selection = 0;
     // Indicates enter key pressed
     int selected = 0;
@@ -54,6 +55,11 @@ int main(void) {
     // 3: Ubuntu
     // 4: Linux Kernel
     int distro = 0;
+    // Architecture and Version variables
+    char* arch = NULL;
+    int arch_len = 0;
+    char* version = NULL;
+    int vers_len = 0;
     // 1: Update screen on next loop
     int update = 1;
     // Window return code
@@ -90,13 +96,20 @@ int main(void) {
             distro = selection + 1;
             selection = 0;
             if (distro == 1) menu_num = 3;
+            else if (distro == 2) menu_num = 2;
             else menu_num = 1;
             break;
         }
         update_selection(mainWindow, &running, &selection, &update, FIRSTMENU_LEN - 2, &selected);
         refresh(); // Refresh curses window
     }
+
     if (menu_num == 1) {
+        // Get version
+        // For ubuntu/kern
+    } 
+
+    if (menu_num == 2) {
         // Get architecture
         char** archs = NULL;
         int archs_len = 0;
@@ -108,18 +121,19 @@ int main(void) {
                 update = 0;
             }
             if (selected) {
-                cleanup(mainWindow);
-                return 0;
+                clear();
+                selected = 0;
+                update = 1;
+                arch = malloc((strlen(archs[selection + 1]) * sizeof(char)) + 1);
+                strcpy(arch, archs[selection + 1]);
+                if (archs != NULL) free(archs);
+                break;
+                
             }
             update_selection(mainWindow, &running, &selection, &update, archs_len - 2, &selected);
             refresh();
         }
     }
-
-    if (menu_num == 2) {
-        // Get version
-        // For ubuntu/kern
-    } 
 
     if (menu_num == 3) {
         // Select file
@@ -147,8 +161,12 @@ int main(void) {
             free(files[i]);
         }
         free(files);
-    }
+    } 
     if (code != 0) cleanup(mainWindow);
+    if (arch != NULL) {
+        printf("%s\n", arch);
+        free(arch);
+    }
 
     return 0;
 }
