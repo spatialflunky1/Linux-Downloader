@@ -57,9 +57,7 @@ int main(void) {
     int distro = 0;
     // Architecture and Version variables
     char* arch = NULL;
-    int arch_len = 0;
     char* version = NULL;
-    int vers_len = 0;
     // 1: Update screen on next loop
     int update = 1;
     // Window return code
