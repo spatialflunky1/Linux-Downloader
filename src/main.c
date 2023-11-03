@@ -94,7 +94,6 @@ int main(void) {
             distro = selection + 1;
             selection = 0;
             if (distro == 1) menu_num = 3;
-            else if (distro == 2) menu_num = 2;
             else menu_num = 1;
             break;
         }
@@ -103,11 +102,6 @@ int main(void) {
     }
 
     if (menu_num == 1) {
-        // Get version
-        // For ubuntu/kern
-    } 
-
-    if (menu_num == 2) {
         // Get architecture
         char** archs = NULL;
         int archs_len = 0;
@@ -125,6 +119,7 @@ int main(void) {
                 arch = malloc((strlen(archs[selection + 1]) * sizeof(char)) + 1);
                 strcpy(arch, archs[selection + 1]);
                 if (archs != NULL) free(archs);
+                menu_num++;
                 break;
                 
             }
@@ -133,12 +128,39 @@ int main(void) {
         }
     }
 
+    if (menu_num == 2) {
+        // Get version
+        char** versions = NULL;
+        int vers_len = 0;
+        append_string_array("Select Version: ", &versions, &vers_len);
+        get_versions(distro, &versions, &vers_len, arch);
+        while (running) {
+            if (update) {
+                dialog(versions, vers_len, height, width, selection);
+                update = 0;
+            }
+            if (selected) {
+                clear();
+                selected = 0;
+                update = 1;
+                version = malloc((strlen(versions[selection + 1]) * sizeof(char)) + 1);
+                strcpy(version, versions[selection + 1]);
+                if (versions != NULL) free(versions);
+                menu_num++;
+                break;
+            }
+            update_selection(mainWindow, &running, &selection, &update, vers_len - 2, &selected);
+            refresh();
+        }
+        //if (versions != NULL) free(versions);
+    } 
+
     if (menu_num == 3) {
         // Select file
         char** files = NULL;
         int files_len = 0;
         append_string_array("Select File:", &files, &files_len);
-        get_files(distro, &files, &files_len);
+        get_files(distro, &files, &files_len, arch, version);
         
         while (running) {
             if (update) {
@@ -161,10 +183,6 @@ int main(void) {
         free(files);
     } 
     if (code != 0) cleanup(mainWindow);
-    if (arch != NULL) {
-        printf("%s\n", arch);
-        free(arch);
-    }
 
     return 0;
 }
