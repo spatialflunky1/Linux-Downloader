@@ -70,7 +70,6 @@ int main(void) {
         if (selected) {
             clear();
             selected = 0;
-            // so the next menu is drawn onscreen
             update = 1;
             distro = selection + 1;
             selection = 0;
@@ -93,7 +92,7 @@ int main(void) {
             break;
         }
         update_selection(mainWindow, &running, &selection, &update, FIRSTMENU_LEN - 2, &selected);
-        refresh(); // Refresh curses window
+        refresh();
     }
 
     if (menu_num == 1) {
@@ -117,13 +116,19 @@ int main(void) {
                     append_string_string("autobuilds/", &URL, &URL_len);
                 }
                 selection = 0;
-                if (archs != NULL) free(archs);
                 menu_num++;
                 break;
                 
             }
             update_selection(mainWindow, &running, &selection, &update, archs_len - 2, &selected);
             refresh();
+        }
+        // First element is a text segment string, cannot free it
+        if (archs != NULL) {
+            for (int i = 1; i < archs_len; i++) {
+                free(archs[i]);
+            }
+            free(archs);
         }
     }
 
@@ -145,14 +150,18 @@ int main(void) {
                 append_string_string(versions[selection + 1], &URL, &URL_len);
                 append_string_string("/", &URL, &URL_len);
                 selection = 0;
-                if (versions != NULL) free(versions);
                 menu_num++;
                 break;
             }
             update_selection(mainWindow, &running, &selection, &update, vers_len - 2, &selected);
             refresh();
         }
-        //if (versions != NULL) free(versions);
+        if (versions != NULL) {
+            for (int i = 1; i < vers_len; i++) {
+                free(versions[i]);
+            }
+            free(versions);
+        }
     } 
 
     if (menu_num == 3) {
@@ -160,8 +169,7 @@ int main(void) {
         char** files = NULL;
         int files_len = 0;
         append_string_array("Select File:", &files, &files_len);
-        get_files(distro, &files, &files_len, URL);
-        
+        get_files(distro, &files, &files_len, URL); 
         while (running) {
             if (update) {
                 dialog(files, files_len, height, width, selection);
@@ -175,14 +183,19 @@ int main(void) {
             update_selection(mainWindow, &running, &selection, &update, files_len - 2, &selected);
             refresh();
         }
-
-        // start at 1, cant free text segment string
-        for (int i = 1; i < files_len; i++) {
-            free(files[i]);
+        if (files != NULL) {
+            for (int i = 1; i < files_len; i++) {
+                free(files[i]);
+            }
+            free(files);
         }
-        free(files);
     } 
-    if (code != 0) cleanup(mainWindow);
+    if (code != 0) {
+        cleanup(mainWindow);
+    }
+    if (URL != NULL) {
+        free(URL);
+    }
 
     return 0;
 }

@@ -24,7 +24,9 @@ size_t write_data(void* data, size_t size, size_t nmemb, FILE* stream) {
 }
 
 int progress_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow) {
-    if (dltotal <= 0.0) return 0;
+    if (dltotal <= 0.0) {
+        return 0;
+    }
     printf("\x1b[d"); // return to home position
     printf("Downloading... %ld%%\n", dlnow*100/dltotal);
     fflush(stdout);
@@ -47,8 +49,12 @@ void append_string_string(char* s, char** string, int* len) {
         fprintf(stderr, "Unable to allocate memory\n");
         exit(1);
     }
-    if ((*len) == 0) strcpy(*string, s);
-    else strcat(*string, s);
+    if ((*len) == 0) {
+        strcpy(*string, s);
+    }
+    else {
+        strcat(*string, s);
+    }
     (*len) += strlen(s);
 }
 
@@ -114,7 +120,7 @@ void get_gentoo_versions(char*** versions, int* vers_len, memory* mem) {
             // Stop checking after readme (first file) is detected0
             break;
         }
-        else if (in_line){
+        else if (in_line) {
             if (mem->html_body[i] == '"') {
                 while (i++, mem->html_body[i] != '/') append_string(mem->html_body[i], &version, &ver_len);
                 append_string('\0', &version, &ver_len);
@@ -128,16 +134,17 @@ void get_gentoo_versions(char*** versions, int* vers_len, memory* mem) {
 }
 
 void get_versions(int distro, char*** versions, int* vers_len, char* URL) {
+    memory* mem = NULL;
     switch (distro) {
-        // Definine variables in case requires a new scope
         case 2: {
-            // +12 is for the length of the autobuilds subdirectory string
-            memory* mem = get_html(URL);
+            mem = get_html(URL);
             get_gentoo_versions(versions, vers_len, mem);
-            //free(mem->html_body);
-            //free(mem);
             break;
         }
+    }
+    if (mem != NULL && mem->html_body != NULL) {
+        free(mem->html_body);
+        free(mem);    
     }
 }
 
@@ -147,10 +154,15 @@ void get_gentoo_archs(char*** archs, int* archs_len, memory* mem) {
     char* arch = NULL;
     int arch_len = 0;
     for (int i = 0; i < mem->html_size; i++) {
-        if (mem->html_body[i] == '[' && i < mem->html_size - 4 && mem->html_body[i+1] == 'D' && mem->html_body[i+2] == 'I' && mem->html_body[i+3] == 'R' && mem->html_body[i+4] == ']') {
+        if (    mem->html_body[i] == '[' && 
+                i < mem->html_size - 4 && 
+                mem->html_body[i+1] == 'D' && 
+                mem->html_body[i+2] == 'I' && 
+                mem->html_body[i+3] == 'R' && 
+                mem->html_body[i+4] == ']') {
             in_line = 1;
         }
-        else if (in_line){
+        else if (in_line) {
             if (mem->html_body[i] == '>') {
                 num_close++;
                 i++;
@@ -165,37 +177,38 @@ void get_gentoo_archs(char*** archs, int* archs_len, memory* mem) {
             }
         }
 
-        if (num_close == 4) append_string(mem->html_body[i], &arch, &arch_len);
+        if (num_close == 4) {
+            append_string(mem->html_body[i], &arch, &arch_len);
+        }
    }
 }
 
 void get_archs(int distro, char*** archs, int* archs_len) {
     memory* mem = NULL;
     switch (distro) {
-        case 2:
+        case 2: {
             mem = get_html(GENTOO_URL);
             get_gentoo_archs(archs, archs_len, mem);
-            //free(mem->html_body);
-            //free(mem);
             break;
+        }
     }
-    /*
     if (mem != NULL && mem->html_body != NULL) {
         free(mem->html_body);
         free(mem);    
     }
-    */
 }
 
 void get_arch_files(char*** files, int* files_len, memory* mem) {
     int inside = 0;
     char* tmp = NULL;
-    int tmp_len = 0; // set to one so null byte inside after first append
+    int tmp_len = 0;
     for (int i = 0; i < mem->html_size; i++) {
         if (mem->html_body[i] == '"') {
             if (inside == 1) {
                 append_string('\0', &tmp, &tmp_len);
-                if (strstr(tmp, "/") == NULL) append_string_array(tmp, files, files_len);
+                if (strstr(tmp, "/") == NULL) {
+                    append_string_array(tmp, files, files_len);
+                }
                 tmp = NULL;
                 tmp_len = 0;
                 inside = 0;
@@ -244,19 +257,19 @@ void get_files(int distro, char*** files, int* files_len, char* URL) {
     memory* mem = NULL;
     mem = get_html(URL);
     switch (distro) {
-        case 1:
+        case 1: {
             get_arch_files(files, files_len, mem);
-            //free(mem->html_body);
-            //free(mem);
             break;
+        }
         case 2: { 
             get_gentoo_files(files, files_len, mem);
             break;
         }
     }
-
-    // html_body is no longer needed
-    if (mem != NULL && mem->html_body != NULL) free(mem->html_body);
+    if (mem != NULL && mem->html_body != NULL) {
+        free(mem->html_body);
+        free(mem);
+    }
 }
 
 void download_file(int distro, char* URL_base, char* filename) {
