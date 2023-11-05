@@ -5,25 +5,6 @@
 
 #define FIRSTMENU_LEN 5
 
-void menu_append(char* menuItem, char*** menu, int* len) {
-    char** newMenu = malloc((*len) + 1);
-    if (newMenu == NULL) {
-        fprintf(stderr, "Unable to allocate memory\n");
-        exit(1);
-    }
-    if (*menu != NULL) {
-        for (int i = 0; i < (*len); i++) {
-            newMenu[i] = malloc((strlen((*menu)[i]) + 1) * sizeof(char));
-            strcpy(newMenu[i], (*menu)[i]);
-        }
-        free(*menu);
-    }
-    newMenu[*len] = malloc((strlen(menuItem) + 1) * sizeof(char)); 
-    strcpy(newMenu[*len], menuItem); 
-    (*len)++;
-    *menu = newMenu;
-}
-
 int main(void) {
     char *firstMenu[5];
     firstMenu[0] = "Select a Distribution:";
