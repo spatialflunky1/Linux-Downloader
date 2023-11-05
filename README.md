@@ -10,7 +10,7 @@ make
 ```
 
 ## Supported Distros:
-- [ ] Arch
-- [ ] Gentoo
+- [x] Arch
+- [x] Gentoo
 - [ ] Ubuntu
 - [ ] Linux Kernel Source (in progress)
