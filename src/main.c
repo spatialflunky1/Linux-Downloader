@@ -55,9 +55,9 @@ int main(void) {
     // 3: Ubuntu
     // 4: Linux Kernel
     int distro = 0;
-    // Architecture and Version variables
-    char* arch = NULL;
-    char* version = NULL;
+    // The URL string is built piecewise
+    char* URL = NULL;
+    int URL_len = 0;
     // 1: Update screen on next loop
     int update = 1;
     // Window return code
@@ -93,8 +93,22 @@ int main(void) {
             update = 1;
             distro = selection + 1;
             selection = 0;
-            if (distro == 1) menu_num = 3;
-            else menu_num = 1;
+            switch (distro) {
+                case 1: {
+                    append_string_string(ARCH_URL, &URL, &URL_len);
+                    menu_num = 3;
+                    break;
+                        }
+                case 2: {
+                    append_string_string(GENTOO_URL, &URL, &URL_len);
+                    menu_num = 1;
+                    break;
+                        }
+                default: {
+                    menu_num = 1;
+                    break;
+                         }
+            }
             break;
         }
         update_selection(mainWindow, &running, &selection, &update, FIRSTMENU_LEN - 2, &selected);
@@ -116,8 +130,12 @@ int main(void) {
                 clear();
                 selected = 0;
                 update = 1;
-                arch = malloc((strlen(archs[selection + 1]) * sizeof(char)) + 1);
-                strcpy(arch, archs[selection + 1]);
+                append_string_string(archs[selection + 1], &URL, &URL_len);
+                append_string_string("/", &URL, &URL_len); // Appending a single character here breaks the string so it needs to append as a string instead, no idea why
+                if (distro == 2) {
+                    append_string_string("autobuilds/", &URL, &URL_len);
+                }
+                selection = 0;
                 if (archs != NULL) free(archs);
                 menu_num++;
                 break;
@@ -133,7 +151,7 @@ int main(void) {
         char** versions = NULL;
         int vers_len = 0;
         append_string_array("Select Version: ", &versions, &vers_len);
-        get_versions(distro, &versions, &vers_len, arch);
+        get_versions(distro, &versions, &vers_len, URL);
         while (running) {
             if (update) {
                 dialog(versions, vers_len, height, width, selection);
@@ -143,8 +161,9 @@ int main(void) {
                 clear();
                 selected = 0;
                 update = 1;
-                version = malloc((strlen(versions[selection + 1]) * sizeof(char)) + 1);
-                strcpy(version, versions[selection + 1]);
+                append_string_string(versions[selection + 1], &URL, &URL_len);
+                append_string_string("/", &URL, &URL_len);
+                selection = 0;
                 if (versions != NULL) free(versions);
                 menu_num++;
                 break;
@@ -160,7 +179,7 @@ int main(void) {
         char** files = NULL;
         int files_len = 0;
         append_string_array("Select File:", &files, &files_len);
-        get_files(distro, &files, &files_len, arch, version);
+        get_files(distro, &files, &files_len, URL);
         
         while (running) {
             if (update) {
@@ -169,7 +188,7 @@ int main(void) {
             }
             if (selected) {
                 code = cleanup(mainWindow);
-                download_file(distro, files[selection + 1]);
+                download_file(distro, URL, files[selection + 1]);
                 break;
             }
             update_selection(mainWindow, &running, &selection, &update, files_len - 2, &selected);

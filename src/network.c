@@ -41,6 +41,17 @@ void append_string(char c, char** string, int* len) {
     (*len)++;
 }
 
+void append_string_string(char* s, char** string, int* len) {
+    *string = realloc(*string, ((*len) + strlen(s) + 1) * sizeof(char));
+    if (*string == NULL) {
+        fprintf(stderr, "Unable to allocate memory\n");
+        exit(1);
+    }
+    if ((*len) == 0) strcpy(*string, s);
+    else strcat(*string, s);
+    (*len) += strlen(s);
+}
+
 void append_string_array(char* s, char*** array, int* len) {
     *array = realloc(*array, ((*len) + 1) * sizeof(char*));
     if (*array == NULL) {
@@ -100,12 +111,11 @@ void get_gentoo_versions(char*** versions, int* vers_len, memory* mem) {
                  mem->html_body[i+2] == ' ' &&
                  mem->html_body[i+3] == ' ' &&
                  mem->html_body[i+4] == ']') {
-            // Stop checking after readme is detected0
+            // Stop checking after readme (first file) is detected0
             break;
         }
         else if (in_line){
             if (mem->html_body[i] == '"') {
-                // inside of 
                 while (i++, mem->html_body[i] != '/') append_string(mem->html_body[i], &version, &ver_len);
                 append_string('\0', &version, &ver_len);
                 append_string_array(version, versions, vers_len);
@@ -117,24 +127,15 @@ void get_gentoo_versions(char*** versions, int* vers_len, memory* mem) {
    }
 }
 
-void get_versions(int distro, char*** versions, int* vers_len, char* arch) {
+void get_versions(int distro, char*** versions, int* vers_len, char* URL) {
     switch (distro) {
         // Definine variables in case requires a new scope
         case 2: {
             // +12 is for the length of the autobuilds subdirectory string
-            char* URL = malloc((strlen(GENTOO_URL) + strlen(arch) + 12 + 1) * sizeof(char));
-            if (URL == NULL) {
-                fprintf(stderr, "Unable to allocate memory\n");
-                exit(1);
-            }
-            strcpy(URL, GENTOO_URL);
-            strcat(URL, arch);
-            strcat(URL, "/autobuilds/");
             memory* mem = get_html(URL);
             get_gentoo_versions(versions, vers_len, mem);
             //free(mem->html_body);
             //free(mem);
-            free(URL);
             break;
         }
     }
@@ -178,14 +179,18 @@ void get_archs(int distro, char*** archs, int* archs_len) {
             //free(mem);
             break;
     }
-
-    if (mem != NULL && mem->html_body != NULL) free(mem->html_body);
+    /*
+    if (mem != NULL && mem->html_body != NULL) {
+        free(mem->html_body);
+        free(mem);    
+    }
+    */
 }
 
 void get_arch_files(char*** files, int* files_len, memory* mem) {
     int inside = 0;
     char* tmp = NULL;
-    int  tmp_len = 0; // set to one so null byte inside after first append
+    int tmp_len = 0; // set to one so null byte inside after first append
     for (int i = 0; i < mem->html_size; i++) {
         if (mem->html_body[i] == '"') {
             if (inside == 1) {
@@ -206,26 +211,46 @@ void get_arch_files(char*** files, int* files_len, memory* mem) {
     }
 }
 
-void get_files(int distro, char*** files, int* files_len, char* arch, char* version) {
+void get_gentoo_files(char*** files, int* files_len, memory* mem) {
+    int in_line = 0;
+    char* tmp = NULL;
+    int tmp_len = 0;
+    for (int i = 0; i < mem->html_size; i++) {
+        if (    mem->html_body[i] == '[' &&
+                i < mem->html_size - 4 &&
+                mem->html_body[i+1] == ' ' &&
+                mem->html_body[i+2] == ' ' &&
+                mem->html_body[i+3] == ' ' &&
+                mem->html_body[i+4] == ']') {
+            in_line = 1;
+            i+=6;
+        }
+        if (in_line) {
+            if (mem->html_body[i] == '"') {
+                while(i++, mem->html_body[i] != '"') append_string(mem->html_body[i], &tmp, &tmp_len);
+                append_string('\0', &tmp, &tmp_len);
+                if (!strstr(tmp, "CONTENTS") && (tmp[tmp_len-2] == 'o' || tmp[tmp_len-2] == 'z')) {
+                    append_string_array(tmp, files, files_len);
+                }
+                in_line = 0;
+                tmp = NULL;
+                tmp_len = 0;
+            }
+        }
+    }
+}
+
+void get_files(int distro, char*** files, int* files_len, char* URL) {
     memory* mem = NULL;
+    mem = get_html(URL);
     switch (distro) {
         case 1:
-            mem = get_html(ARCH_URL);
             get_arch_files(files, files_len, mem);
             //free(mem->html_body);
             //free(mem);
             break;
-        case 2: {
-            char* URL = malloc(strlen(GENTOO_URL) +
-                               strlen(arch) +
-                               12 +
-                               strlen(version) +
-                               1);
-            strcpy(URL, GENTOO_URL);
-            strcat(URL, arch);
-            strcat(URL, "/autobuilds/");
-            strcat(URL, version);
-            //mem = get_html(URL);
+        case 2: { 
+            get_gentoo_files(files, files_len, mem);
             break;
         }
     }
@@ -234,23 +259,14 @@ void get_files(int distro, char*** files, int* files_len, char* arch, char* vers
     if (mem != NULL && mem->html_body != NULL) free(mem->html_body);
 }
 
-void download_file(int distro, char* filename) {
-    char* URL = NULL;
-    switch (distro) {
-        case 1:
-            URL = malloc((strlen(ARCH_URL) + strlen(filename) + 1) * sizeof(char));
-            if (URL == NULL) {
-                fprintf(stderr, "Unable to allocate memory\n");
-                exit(1);
-            }
-            strcpy(URL, ARCH_URL);
-            strcat(URL, filename);
-            break;
-    }
+void download_file(int distro, char* URL_base, char* filename) {
+    char* URL = malloc((strlen(URL_base) + strlen(filename) + 1) * sizeof(char));
     if (URL == NULL) {
-        fprintf(stderr, "Error!\n");
+        fprintf(stderr, "Unable to allocate memory\n");
         exit(1);
     }
+    strcpy(URL, URL_base);
+    strcat(URL, filename);
     
     CURL* handle;
     handle = curl_easy_init();
