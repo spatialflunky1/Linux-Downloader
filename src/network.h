@@ -5,6 +5,9 @@
 
 #define ARCH_URL "https://mirrors.mit.edu/archlinux/iso/latest/"
 #define GENTOO_URL "https://distfiles.gentoo.org/releases/"
+#define MEMORY_ERROR "Unable to allocate memory\n"
+#define NETWORK_ERROR "Unknown Network Error\n"
+#define CURL_ERROR "Curl Library Errror\n"
 
 typedef struct memory {
     char* html_body;

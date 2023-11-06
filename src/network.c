@@ -8,7 +8,7 @@ size_t write_callback_html(char* data, size_t size, size_t nmemb, memory* mem) {
     size_t realsize = size * nmemb;
     char* ptr = realloc(mem->html_body, mem->html_size + realsize + 1);
     if (ptr == NULL) {
-        fprintf(stderr, "Unable to allocate memory\n");
+        fprintf(stderr, MEMORY_ERROR);
         exit(1);
     }
     mem->html_body = ptr;
@@ -36,7 +36,7 @@ int progress_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_
 void append_string(char c, char** string, int* len) { 
     *string = realloc(*string, ((*len) + 1) * sizeof(char));
     if (*string == NULL) {
-        fprintf(stderr, "Unable to allocate memory\n");
+        fprintf(stderr, MEMORY_ERROR);
         exit(1);
     }
     (*string)[*len] = c;
@@ -46,7 +46,7 @@ void append_string(char c, char** string, int* len) {
 void append_string_string(char* s, char** string, int* len) {
     *string = realloc(*string, ((*len) + strlen(s) + 1) * sizeof(char));
     if (*string == NULL) {
-        fprintf(stderr, "Unable to allocate memory\n");
+        fprintf(stderr, MEMORY_ERROR);
         exit(1);
     }
     if ((*len) == 0) {
@@ -61,7 +61,7 @@ void append_string_string(char* s, char** string, int* len) {
 void append_string_array(char* s, char*** array, int* len) {
     *array = realloc(*array, ((*len) + 1) * sizeof(char*));
     if (*array == NULL) {
-        fprintf(stderr, "Unable to allocate memory\n");
+        fprintf(stderr, MEMORY_ERROR);
         exit(1);
     }
     (*array)[*len] = s;
@@ -73,7 +73,7 @@ memory* get_html(char* URL) {
     handle = curl_easy_init();
     memory* mem = malloc(sizeof(memory));
     if (mem == NULL) {
-        fprintf(stderr, "Unable to allocate memory\n");
+        fprintf(stderr, MEMORY_ERROR);
         exit(1);
     }
     mem->html_body = NULL;
@@ -85,13 +85,13 @@ memory* get_html(char* URL) {
         curl_easy_setopt(handle, CURLOPT_WRITEDATA, mem);
         response = curl_easy_perform(handle);
         if (response != 0) {
-            fprintf(stderr, "Network Error!\n");
+            fprintf(stderr, NETWORK_ERROR);
             exit(1);
         }
         curl_easy_cleanup(handle);
     }
     else {
-        fprintf(stderr, "Curl Error!\n");
+        fprintf(stderr, CURL_ERROR);
         exit(1);
     }
     return mem;
@@ -275,7 +275,7 @@ void get_files(int distro, char*** files, int* files_len, char* URL) {
 void download_file(int distro, char* URL_base, char* filename) {
     char* URL = malloc((strlen(URL_base) + strlen(filename) + 1) * sizeof(char));
     if (URL == NULL) {
-        fprintf(stderr, "Unable to allocate memory\n");
+        fprintf(stderr, MEMORY_ERROR);
         exit(1);
     }
     strcpy(URL, URL_base);
@@ -293,7 +293,7 @@ void download_file(int distro, char* URL_base, char* filename) {
         curl_easy_setopt(handle, CURLOPT_NOPROGRESS, 0);
         response = curl_easy_perform(handle);
         if (response != 0) {
-            fprintf(stderr, "Network Error\n");
+            fprintf(stderr, NETWORK_ERROR);
             exit(1);
         }
 
@@ -301,7 +301,7 @@ void download_file(int distro, char* URL_base, char* filename) {
         fclose(fptr);
     }
     else {
-        fprintf(stderr, "Curl Error!\n");
+        fprintf(stderr, CURL_ERROR);
         exit(1);
     }
 
