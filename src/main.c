@@ -86,7 +86,7 @@ int main(void) {
                 }
                 case 3: {
                     append_string_string(UBUNTU_URL, &URL, &URL_len);
-                    menu_num = 1; 
+                    menu_num = 2; 
                     break;
                 }
             }
