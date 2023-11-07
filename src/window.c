@@ -24,6 +24,7 @@ void update_selection(WINDOW* mainWindow, int* running, int* selection, int* upd
             break;
         case 10:
             *selected = 1;
+            mvprintw(1, 0, "Loading...");
             break;
     }
 }
