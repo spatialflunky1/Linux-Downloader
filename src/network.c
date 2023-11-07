@@ -1,4 +1,5 @@
 #include "network.h"
+#include <ctype.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <curl/system.h>
@@ -97,108 +98,12 @@ memory* get_html(char* URL) {
     return mem;
 }
 
-void get_gentoo_versions(char*** versions, int* vers_len, memory* mem) {
-    int in_line = 0;
-    char* version = NULL;
-    int ver_len = 0;
-    for (int i = 0; i < mem->html_size; i++) {
-        if (    mem->html_body[i] == '[' &&
-                i < mem->html_size - 4 &&
-                mem->html_body[i+1] == 'D' &&
-                mem->html_body[i+2] == 'I' &&
-                mem->html_body[i+3] == 'R' &&
-                mem->html_body[i+4] == ']') {
-            in_line = 1;
-            i+=5;
-        }
-        else if (mem->html_body[i] == '[' &&
-                 i < mem->html_size - 4 &&
-                 mem->html_body[i+1] == ' ' &&
-                 mem->html_body[i+2] == ' ' &&
-                 mem->html_body[i+3] == ' ' &&
-                 mem->html_body[i+4] == ']') {
-            // Stop checking after readme (first file) is detected0
-            break;
-        }
-        else if (in_line) {
-            if (mem->html_body[i] == '"') {
-                while (i++, mem->html_body[i] != '/') append_string(mem->html_body[i], &version, &ver_len);
-                append_string('\0', &version, &ver_len);
-                append_string_array(version, versions, vers_len);
-                version = NULL;
-                ver_len = 0;
-                in_line = 0;
-            }
-        }
-   }
-}
-
-void get_versions(int distro, char*** versions, int* vers_len, char* URL) {
-    memory* mem = NULL;
-    switch (distro) {
-        case 2: {
-            mem = get_html(URL);
-            get_gentoo_versions(versions, vers_len, mem);
-            break;
-        }
-    }
-    if (mem != NULL && mem->html_body != NULL) {
-        free(mem->html_body);
-        free(mem);    
-    }
-}
-
-void get_gentoo_archs(char*** archs, int* archs_len, memory* mem) {
-    int in_line = 0;
-    int num_close = 0;
-    char* arch = NULL;
-    int arch_len = 0;
-    for (int i = 0; i < mem->html_size; i++) {
-        if (    mem->html_body[i] == '[' && 
-                i < mem->html_size - 4 && 
-                mem->html_body[i+1] == 'D' && 
-                mem->html_body[i+2] == 'I' && 
-                mem->html_body[i+3] == 'R' && 
-                mem->html_body[i+4] == ']') {
-            in_line = 1;
-        }
-        else if (in_line) {
-            if (mem->html_body[i] == '>') {
-                num_close++;
-                i++;
-            }
-            else if (num_close == 4 && mem->html_body[i] == '/') {
-                in_line = 0;
-                num_close = 0;
-                append_string('\0', &arch, &arch_len);
-                append_string_array(arch, archs, archs_len);
-                arch = NULL;
-                arch_len = 0;
-            }
-        }
-
-        if (num_close == 4) {
-            append_string(mem->html_body[i], &arch, &arch_len);
-        }
-   }
-}
-
-void get_archs(int distro, char*** archs, int* archs_len) {
-    memory* mem = NULL;
-    switch (distro) {
-        case 2: {
-            mem = get_html(GENTOO_URL);
-            get_gentoo_archs(archs, archs_len, mem);
-            break;
-        }
-    }
-    if (mem != NULL && mem->html_body != NULL) {
-        free(mem->html_body);
-        free(mem);    
-    }
-}
-
-void get_arch_files(char*** files, int* files_len, memory* mem) {
+/* Special Modes:
+ * 0: none
+ * 1: Gentoo Files
+ */
+void get_files(char* URL, char*** files, int* files_len, int special_modes) {
+    memory* mem = get_html(URL);
     int inside = 0;
     char* tmp = NULL;
     int tmp_len = 0;
@@ -207,7 +112,14 @@ void get_arch_files(char*** files, int* files_len, memory* mem) {
             if (inside == 1) {
                 append_string('\0', &tmp, &tmp_len);
                 if (strstr(tmp, "/") == NULL) {
-                    append_string_array(tmp, files, files_len);
+                    if (special_modes == 1) {
+                        if (strstr(tmp, "CONTENTS") == NULL && (tmp[tmp_len-2]=='o' || tmp[tmp_len-2]=='z')) {
+                            append_string_array(tmp, files, files_len);
+                        }
+                    }
+                    else {
+                        append_string_array(tmp, files, files_len);
+                    }
                 }
                 tmp = NULL;
                 tmp_len = 0;
@@ -224,51 +136,41 @@ void get_arch_files(char*** files, int* files_len, memory* mem) {
     }
 }
 
-void get_gentoo_files(char*** files, int* files_len, memory* mem) {
+/* Special Modes:
+ * 0: none
+ * 1: Gentoo Versions
+ */
+void get_directories(char* URL, char*** dirs, int* dirs_len, int special_modes) {
+    memory* mem = get_html(URL);
     int in_line = 0;
     char* tmp = NULL;
     int tmp_len = 0;
     for (int i = 0; i < mem->html_size; i++) {
-        if (    mem->html_body[i] == '[' &&
-                i < mem->html_size - 4 &&
-                mem->html_body[i+1] == ' ' &&
-                mem->html_body[i+2] == ' ' &&
-                mem->html_body[i+3] == ' ' &&
-                mem->html_body[i+4] == ']') {
-            in_line = 1;
-            i+=6;
-        }
-        if (in_line) {
-            if (mem->html_body[i] == '"') {
-                while(i++, mem->html_body[i] != '"') append_string(mem->html_body[i], &tmp, &tmp_len);
-                append_string('\0', &tmp, &tmp_len);
-                if (!strstr(tmp, "CONTENTS") && (tmp[tmp_len-2] == 'o' || tmp[tmp_len-2] == 'z')) {
-                    append_string_array(tmp, files, files_len);
+        if (mem->html_body[i] == '"' && in_line == 0) {
+            while (i++, mem->html_body[i] != '/') {
+                if (mem->html_body[i] == '"') {
+                    tmp = NULL;
+                    tmp_len = 0;
+                    break;
                 }
-                in_line = 0;
+                append_string(mem->html_body[i], &tmp, &tmp_len);
+            }
+            if (tmp != NULL) {
+                append_string('\0', &tmp, &tmp_len);
+                if (tmp[0] != '.') {
+                    if (special_modes == 1 && !isdigit(tmp[0])) {
+                        return;
+                    }
+                    append_string_array(tmp, dirs, dirs_len);
+                }
                 tmp = NULL;
                 tmp_len = 0;
+                in_line = 1;
             }
         }
-    }
-}
-
-void get_files(int distro, char*** files, int* files_len, char* URL) {
-    memory* mem = NULL;
-    mem = get_html(URL);
-    switch (distro) {
-        case 1: {
-            get_arch_files(files, files_len, mem);
-            break;
+        if (mem->html_body[i] == '\n') {
+            in_line = 0;
         }
-        case 2: { 
-            get_gentoo_files(files, files_len, mem);
-            break;
-        }
-    }
-    if (mem != NULL && mem->html_body != NULL) {
-        free(mem->html_body);
-        free(mem);
     }
 }
 

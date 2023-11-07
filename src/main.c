@@ -78,16 +78,17 @@ int main(void) {
                     append_string_string(ARCH_URL, &URL, &URL_len);
                     menu_num = 3;
                     break;
-                        }
+                }
                 case 2: {
                     append_string_string(GENTOO_URL, &URL, &URL_len);
                     menu_num = 1;
                     break;
-                        }
-                default: {
-                    menu_num = 1;
+                }
+                case 3: {
+                    append_string_string(UBUNTU_URL, &URL, &URL_len);
+                    menu_num = 1; 
                     break;
-                         }
+                }
             }
             break;
         }
@@ -100,7 +101,7 @@ int main(void) {
         char** archs = NULL;
         int archs_len = 0;
         append_string_array("Select Architecture: ", &archs, &archs_len);
-        get_archs(distro, &archs, &archs_len);
+        get_directories(URL, &archs, &archs_len, 0);
         while (running) {
             if (update) {
                 dialog(archs, archs_len, height, width, selection);
@@ -137,7 +138,7 @@ int main(void) {
         char** versions = NULL;
         int vers_len = 0;
         append_string_array("Select Version: ", &versions, &vers_len);
-        get_versions(distro, &versions, &vers_len, URL);
+        get_directories(URL, &versions, &vers_len, distro==2 ? 1 : 0);
         while (running) {
             if (update) {
                 dialog(versions, vers_len, height, width, selection);
@@ -169,7 +170,7 @@ int main(void) {
         char** files = NULL;
         int files_len = 0;
         append_string_array("Select File:", &files, &files_len);
-        get_files(distro, &files, &files_len, URL); 
+        get_files(URL, &files, &files_len, distro==2 ? 1 : 0); 
         while (running) {
             if (update) {
                 dialog(files, files_len, height, width, selection);

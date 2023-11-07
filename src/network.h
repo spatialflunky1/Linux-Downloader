@@ -4,7 +4,9 @@
 #include <curl/curl.h>
 
 #define ARCH_URL "https://mirrors.mit.edu/archlinux/iso/latest/"
-#define GENTOO_URL "https://distfiles.gentoo.org/releases/"
+#define GENTOO_URL "https://mirrors.mit.edu/gentoo-distfiles/releases/"
+#define UBUNTU_URL "https://mirrors.mit.edu/ubuntu-releases/"
+
 #define MEMORY_ERROR "Unable to allocate memory\n"
 #define NETWORK_ERROR "Unknown Network Error\n"
 #define CURL_ERROR "Curl Library Errror\n"
@@ -20,12 +22,6 @@ int progress_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_
 void append_string(char c, char** string, int* len);
 void append_string_string(char* s, char** string, int* len);
 void append_string_array(char* s, char*** array, int* len);
-void get_gentoo_versions(char*** versions, int* vers_len, memory* mem);
-void get_versions(int distro, char*** versions, int* vers_len, char* arch);
-void get_gentoo_archs(char*** archs, int* archs_len, memory* mem);
-void get_archs(int distro, char*** archs, int* archs_len);
-void get_arch_files(char*** files, int* files_len, memory* mem);
-void get_archs(int distro, char*** archs, int* archs_len);
-void get_gentoo_files(char*** files, int* files_len, memory* mem);
-void get_files(int distro, char*** files, int* files_len, char* URL);
+void get_files(char* URL, char*** files, int* files_len, int special_modes);
+void get_directories(char* URL, char*** dirs, int* dirs_len, int special_modes);
 void download_file(int distro, char* URL_base, char* filename);
