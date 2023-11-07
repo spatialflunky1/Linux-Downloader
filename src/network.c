@@ -139,7 +139,7 @@ void get_files(char* URL, char*** files, int* files_len, int special_modes) {
 
 /* Special Modes:
  * 0: none
- * 1: Gentoo Versions
+ * 1: Gentoo/Ubuntu Versions
  */
 void get_directories(char* URL, char*** dirs, int* dirs_len, int special_modes) {
     memory* mem = get_html(URL);
@@ -173,6 +173,12 @@ void get_directories(char* URL, char*** dirs, int* dirs_len, int special_modes) 
         if (mem->html_body[i] == '\n') {
             in_line = 0;
         }
+    }
+    if (mem != NULL) {
+        if (mem->html_body != NULL) {
+            free(mem->html_body);
+        }
+        free(mem);
     }
 }
 
