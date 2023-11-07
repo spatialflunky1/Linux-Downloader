@@ -111,6 +111,7 @@ void get_files(char* URL, char*** files, int* files_len, int special_modes) {
         if (mem->html_body[i] == '"') {
             if (inside == 1) {
                 append_string('\0', &tmp, &tmp_len);
+                // Append if not directory
                 if (strstr(tmp, "/") == NULL) {
                     if (special_modes == 1) {
                         if (strstr(tmp, "CONTENTS") == NULL && (tmp[tmp_len-2]=='o' || tmp[tmp_len-2]=='z')) {
@@ -158,6 +159,7 @@ void get_directories(char* URL, char*** dirs, int* dirs_len, int special_modes) 
             if (tmp != NULL) {
                 append_string('\0', &tmp, &tmp_len);
                 if (tmp[0] != '.') {
+                    // Gentoo's versions start with digits
                     if (special_modes == 1 && !isdigit(tmp[0])) {
                         return;
                     }
