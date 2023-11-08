@@ -12,5 +12,5 @@ make
 ## Supported Distros:
 - [x] Arch
 - [x] Gentoo
-- [ ] Ubuntu
+- [x] Ubuntu
 - [ ] Linux Kernel Source (in progress)
