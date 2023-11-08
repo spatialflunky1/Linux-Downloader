@@ -109,7 +109,12 @@ void get_files(char* URL, char*** files, int* files_len, int distro) {
                 append_string('\0', &tmp, &tmp_len);
                 // Append if not directory
                 if (strstr(tmp, "/") == NULL) {
-                    if (distro == 2) {
+                    if (distro == 1) {
+                        if (tmp[tmp_len-2]=='o' || tmp[tmp_len-2]=='z') {
+                            append_string_array(tmp, files, files_len);
+                        }
+                    }
+                    else if (distro == 2) {
                         if (strstr(tmp, "CONTENTS") == NULL && (tmp[tmp_len-2]=='o' || tmp[tmp_len-2]=='z')) {
                             append_string_array(tmp, files, files_len);
                         }

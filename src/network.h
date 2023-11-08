@@ -5,7 +5,7 @@
 #include <string.h>
 #include <curl/curl.h>
 
-#define ARCH_URL "https://mirrors.mit.edu/archlinux/iso/latest/"
+#define ARCH_URL "https://mirrors.mit.edu/archlinux/iso/"
 #define GENTOO_URL "https://mirrors.mit.edu/gentoo-distfiles/releases/"
 #define UBUNTU_URL "https://mirrors.mit.edu/ubuntu-releases/"
 

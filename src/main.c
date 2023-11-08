@@ -76,7 +76,7 @@ int main(void) {
             switch (distro) {
                 case 1: {
                     append_string_string(ARCH_URL, &URL, &URL_len);
-                    menu_num = 3;
+                    menu_num = 2;
                     break;
                 }
                 case 2: {
