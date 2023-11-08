@@ -170,7 +170,7 @@ int main(void) {
         char** files = NULL;
         int files_len = 0;
         append_string_array("Select File:", &files, &files_len);
-        get_files(URL, &files, &files_len, distro==2 ? 1 : 0); 
+        get_files(URL, &files, &files_len, distro); 
         while (running) {
             if (update) {
                 dialog(files, files_len, height, width, selection);

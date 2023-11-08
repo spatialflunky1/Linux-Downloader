@@ -24,6 +24,6 @@ int progress_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_
 void append_string(char c, char** string, int* len);
 void append_string_string(char* s, char** string, int* len);
 void append_string_array(char* s, char*** array, int* len);
-void get_files(char* URL, char*** files, int* files_len, int special_modes);
+void get_files(char* URL, char*** files, int* files_len, int distro);
 void get_directories(char* URL, char*** dirs, int* dirs_len, int special_modes);
 void download_file(int distro, char* URL_base, char* filename);

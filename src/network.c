@@ -98,11 +98,7 @@ memory* get_html(char* URL) {
     return mem;
 }
 
-/* Special Modes:
- * 0: none
- * 1: Gentoo Files
- */
-void get_files(char* URL, char*** files, int* files_len, int special_modes) {
+void get_files(char* URL, char*** files, int* files_len, int distro) {
     memory* mem = get_html(URL);
     int inside = 0;
     char* tmp = NULL;
@@ -113,8 +109,13 @@ void get_files(char* URL, char*** files, int* files_len, int special_modes) {
                 append_string('\0', &tmp, &tmp_len);
                 // Append if not directory
                 if (strstr(tmp, "/") == NULL) {
-                    if (special_modes == 1) {
+                    if (distro == 2) {
                         if (strstr(tmp, "CONTENTS") == NULL && (tmp[tmp_len-2]=='o' || tmp[tmp_len-2]=='z')) {
+                            append_string_array(tmp, files, files_len);
+                        }
+                    }
+                    else if (distro == 3) {
+                        if (tmp[tmp_len-2]=='o' && tmp[tmp_len-3]=='s') {
                             append_string_array(tmp, files, files_len);
                         }
                     }
