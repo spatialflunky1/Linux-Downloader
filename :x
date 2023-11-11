@@ -143,7 +143,7 @@ int main(void) {
         char** versions = NULL;
         int vers_len = 0;
         append_string_array("Select Version: ", &versions, &vers_len);
-        get_directories(URL, &versions, &vers_len, (distro==2||distro==3) ? 1 : distro==4 ? 2 : 0);
+        get_directories(URL, &versions, &vers_len, (distro==2||distro==3) ? 1 : 0);
         while (running) {
             if (update) {
                 dialog(versions, vers_len, height, width, selection);

@@ -8,6 +8,7 @@
 #define ARCH_URL "https://mirrors.mit.edu/archlinux/iso/"
 #define GENTOO_URL "https://mirrors.mit.edu/gentoo-distfiles/releases/"
 #define UBUNTU_URL "https://mirrors.mit.edu/ubuntu-releases/"
+#define LINUX_URL "https://cdn.kernel.org/pub/linux/kernel/"
 
 #define MEMORY_ERROR "Unable to allocate memory\n"
 #define NETWORK_ERROR "Unknown Network Error\n"

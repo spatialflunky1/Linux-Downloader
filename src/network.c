@@ -124,6 +124,11 @@ void get_files(char* URL, char*** files, int* files_len, int distro) {
                             append_string_array(tmp, files, files_len);
                         }
                     }
+                    else if (distro == 4) {
+                        if (tmp[tmp_len-2]=='z' || tmp[tmp_len-2]=='2') {
+                            append_string_array(tmp, files, files_len);
+                        }
+                    }
                     else {
                         append_string_array(tmp, files, files_len);
                     }
@@ -146,6 +151,7 @@ void get_files(char* URL, char*** files, int* files_len, int distro) {
 /* Special Modes:
  * 0: none
  * 1: Gentoo/Ubuntu Versions
+ * 2: Linux Versions
  */
 void get_directories(char* URL, char*** dirs, int* dirs_len, int special_modes) {
     memory* mem = get_html(URL);
@@ -169,7 +175,14 @@ void get_directories(char* URL, char*** dirs, int* dirs_len, int special_modes) 
                     if (special_modes == 1 && !isdigit(tmp[0])) {
                         return;
                     }
-                    append_string_array(tmp, dirs, dirs_len);
+                    else if (special_modes == 2) {
+                        if (tmp[0] == 'v') {
+                            append_string_array(tmp, dirs, dirs_len);
+                        }
+                    }
+                    else {
+                        append_string_array(tmp, dirs, dirs_len);
+                    }
                 }
                 tmp = NULL;
                 tmp_len = 0;
