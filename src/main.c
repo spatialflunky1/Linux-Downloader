@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "window.h"
 #include "network.h"
 
@@ -28,6 +29,7 @@ int main(void) {
     // 1: Arch (ex. x86, NOT the distro)
     // 2: Version
     // 3: Files
+    // 4: Filetype (for linux kernel to minimize menu selections)
     int menu_num = 0;
     // Selected distro
     // 0: None
@@ -43,6 +45,12 @@ int main(void) {
     int update = 1;
     // Window return code
     int code = 1;
+    // Files list is global in order to be across multiple menus
+    char** files = NULL;
+    int files_len = 0;
+    // Files without the filetypes
+    char** ftypes = NULL;
+    int ftypes_len = 0;
     if ((mainWindow = initscr()) == NULL) {
         fprintf(stderr, "Failed to start ncurses\n");
         return 1;
@@ -172,30 +180,78 @@ int main(void) {
 
     if (menu_num == 3) {
         // Select file
-        char** files = NULL;
-        int files_len = 0;
-        append_string_array("Select File:", &files, &files_len);
-        get_files(URL, &files, &files_len, distro); 
+        append_string_array("Select File:", &ftypes, &ftypes_len);
+        get_files(URL, &files, &files_len, distro, &ftypes, &ftypes_len); 
         while (running) {
             if (update) {
-                dialog(files, files_len, height, width, selection);
+                dialog(ftypes, ftypes_len, height, width, selection);
+                update = 0;
+            }
+            if (selected) {
+                if (distro != 4) {
+                    code = cleanup(mainWindow);
+                    download_file(distro, URL, files[selection + 1]);
+                }
+                else {
+                    clear();
+                    menu_num++;
+                    update = 1;
+                    selected = 0;
+                }
+                break;
+            }
+            update_selection(mainWindow, &running, &selection, &update, ftypes_len - 2, &selected);
+            refresh();
+        }
+    }
+
+    if (menu_num == 4) {
+        // Select filetype
+        char** filetypes = NULL;
+        int filetypes_len = 0;
+        // Need to use a different selection variable to save selected file
+        int filetype_selection = 0;
+
+        append_string_array("Select Filetype:", &filetypes, &filetypes_len);
+        for (int i = 0; i < files_len; i++) {
+            if (sub_compare(ftypes[selection + 1], files[i]) == 1) {
+                if (isdigit(ftypes[selection+1][strlen(ftypes[selection+1]) - 1])) {
+                    if (files[i][strlen(ftypes[selection+1]) + 1] != 'p') {
+                        append_string_array(files[i], &filetypes, &filetypes_len); 
+                    }
+                }
+                else {
+                    append_string_array(files[i], &filetypes, &filetypes_len);
+                }
+            }
+        }
+        while (running) {
+            if (update) {
+                dialog(filetypes, filetypes_len, height, width, filetype_selection);
                 update = 0;
             }
             if (selected) {
                 code = cleanup(mainWindow);
-                download_file(distro, URL, files[selection + 1]);
+                download_file(distro, URL, filetypes[selection + 1]);
                 break;
             }
-            update_selection(mainWindow, &running, &selection, &update, files_len - 2, &selected);
+            update_selection(mainWindow, &running, &filetype_selection, &update, filetypes_len - 2, &selected);
             refresh();
         }
+
         if (files != NULL) {
-            for (int i = 1; i < files_len; i++) {
+            for (int i = 0; i < files_len; i++) {
                 free(files[i]);
             }
             free(files);
         }
-    } 
+        if (ftypes != NULL) {
+            for (int i = 1; i < ftypes_len; i++) {
+                free(ftypes[i]);
+            }
+            free(ftypes);
+        }
+    }
     if (code != 0) {
         cleanup(mainWindow);
     }

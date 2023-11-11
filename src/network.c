@@ -4,6 +4,7 @@
 #include <curl/easy.h>
 #include <curl/system.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 size_t write_callback_html(char* data, size_t size, size_t nmemb, memory* mem) {
     size_t realsize = size * nmemb;
@@ -69,6 +70,24 @@ void append_string_array(char* s, char*** array, int* len) {
     (*len)++;
 }
 
+int contains(char* s, char** array, int len) {
+    for (int i = 0; i < len; i++) {
+        if (strcmp(array[i],s) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int sub_compare(char* sub_s, char* s) {
+    for (int i = 0; i < strlen(sub_s); i++) {
+        if (sub_s[i] != s[i]) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 memory* get_html(char* URL) {
     CURL* handle;
     handle = curl_easy_init();
@@ -98,7 +117,7 @@ memory* get_html(char* URL) {
     return mem;
 }
 
-void get_files(char* URL, char*** files, int* files_len, int distro) {
+void get_files(char* URL, char*** files, int* files_len, int distro, char*** ftypes, int* ftypes_len) {
     memory* mem = get_html(URL);
     int inside = 0;
     char* tmp = NULL;
@@ -109,28 +128,60 @@ void get_files(char* URL, char*** files, int* files_len, int distro) {
                 append_string('\0', &tmp, &tmp_len);
                 // Append if not directory
                 if (strstr(tmp, "/") == NULL) {
-                    if (distro == 1) {
-                        if (tmp[tmp_len-2]=='o' || tmp[tmp_len-2]=='z') {
-                            append_string_array(tmp, files, files_len);
+                    switch (distro) {
+                        case 1: {
+                            if (tmp[tmp_len-2]=='o' || tmp[tmp_len-2]=='z') {
+                                append_string_array(tmp, files, files_len);
+                            }
+                            break;
                         }
-                    }
-                    else if (distro == 2) {
-                        if (strstr(tmp, "CONTENTS") == NULL && (tmp[tmp_len-2]=='o' || tmp[tmp_len-2]=='z')) {
+                        case 2: {
+                            if (strstr(tmp, "CONTENTS") == NULL && (tmp[tmp_len-2]=='o' || tmp[tmp_len-2]=='z')) {
                             append_string_array(tmp, files, files_len);
+                            }
+                            break;
                         }
-                    }
-                    else if (distro == 3) {
-                        if (tmp[tmp_len-2]=='o' && tmp[tmp_len-3]=='s') {
-                            append_string_array(tmp, files, files_len);
+                        case 3: {
+                            if (tmp[tmp_len-2]=='o' && tmp[tmp_len-3]=='s') {
+                                append_string_array(tmp, files, files_len);
+                            }
+                            break;
                         }
-                    }
-                    else if (distro == 4) {
-                        if (tmp[tmp_len-2]=='z' || tmp[tmp_len-2]=='2') {
-                            append_string_array(tmp, files, files_len);
+                        case 4: {
+                            if (tmp[tmp_len-2]=='z' || tmp[tmp_len-2]=='2') {
+                                append_string_array(tmp, files, files_len);
+                                // remove file extensions
+                                char* new = malloc(tmp_len * sizeof(char)); 
+                                strcpy(new, tmp);
+                                int remove = 0;
+                                if (new[tmp_len - 2] == '2') {
+                                    if (new[tmp_len - 8] == 't' &&
+                                        new[tmp_len - 7] == 'a' &&
+                                        new[tmp_len - 6] == 'r') {
+                                        remove = 8;
+                                    }
+                                    else {
+                                        remove = 4;
+                                    }
+                                }
+                                else {
+                                    if (new[tmp_len - 7] == 't' &&
+                                        new[tmp_len - 6] == 'a' &&
+                                        new[tmp_len - 5] == 'r') {
+                                        remove = 7;
+                                    }
+                                    else {
+                                        remove = 3;
+                                    }
+                                }
+                                new[tmp_len - remove - 1] = '\0';
+                                new = realloc(new, (tmp_len-remove) * sizeof(char));
+                                if (contains(new, *ftypes, *ftypes_len) == 0) {
+                                    append_string_array(new, ftypes, ftypes_len);
+                                }
+                            }
+                            break;
                         }
-                    }
-                    else {
-                        append_string_array(tmp, files, files_len);
                     }
                 }
                 tmp = NULL;

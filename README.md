@@ -13,4 +13,4 @@ make
 - [x] Arch
 - [x] Gentoo
 - [x] Ubuntu
-- [ ] Linux Kernel Source (in progress)
+- [x] Linux Kernel Source
